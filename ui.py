@@ -1,9 +1,8 @@
 from __future__ import annotations
 from decimal import Decimal
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-    QPushButton, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox, QComboBox, QInputDialog, QFrame)
+from qt_compat import (Qt,QKeySequence,QShortcut,QMainWindow,QWidget,QVBoxLayout,QHBoxLayout,QLabel,
+    QLineEdit,QPushButton,QTableWidget,QTableWidgetItem,QHeaderView,QMessageBox,QComboBox,QInputDialog,
+    QFrame,dialog_exec)
 from domain import Cart, money
 from database import find_product, persist_sale
 from config_dialog import FiscalConfigDialog
@@ -47,7 +46,7 @@ class MainWindow(QMainWindow):
         self.cart.add(p); self.search.clear(); self.refresh()
 
     def open_settings(self):
-        if FiscalConfigDialog(self).exec():
+        if dialog_exec(FiscalConfigDialog(self)):
             self.sat=create_fiscal(); self.fiscal_status.setText(self.sat.status())
 
     def refresh(self):
