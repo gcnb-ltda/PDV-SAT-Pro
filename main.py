@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
-from PySide6.QtWidgets import QApplication
+from qt_compat import QApplication
 
 load_dotenv(Path(__file__).with_name(".env"))
 from database import init_db
