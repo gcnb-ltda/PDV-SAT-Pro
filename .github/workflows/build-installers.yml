@@ -59,6 +59,10 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: python -m pip install -r requirements.txt
+      - name: Preparar dependências Universal2
+        run: |
+          python -m pip uninstall -y SQLAlchemy greenlet
+          DISABLE_SQLALCHEMY_CEXT=1 python -m pip install --no-binary SQLAlchemy --no-deps SQLAlchemy
       - name: Compilar aplicativo Universal
         run: python -m PyInstaller --noconfirm --clean --windowed --name "PDV SAT Pro" --target-architecture universal2 main.py
       - name: Criar DMG
