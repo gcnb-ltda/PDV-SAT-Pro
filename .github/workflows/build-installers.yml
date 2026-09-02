@@ -1,0 +1,88 @@
+name: Compilar instaladores
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements.txt
+      - run: pytest -q
+
+  windows:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, x86]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: ${{ matrix.arch }}
+      - run: python -m pip install -r requirements.txt
+      - run: python -m PyInstaller --noconfirm --clean pdv_sat_pro.spec
+      - name: Criar instalador
+        shell: pwsh
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DArch=${{ matrix.arch }}" installer\windows.iss'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PDV-SAT-Pro-Windows-${{ matrix.arch }}
+          path: dist/PDV-SAT-Pro-Windows-${{ matrix.arch }}-Setup.exe
+
+  macos:
+    needs: test
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m pip install -r requirements.txt
+      - name: Compilar aplicativo Universal
+        run: python -m PyInstaller --noconfirm --clean --windowed --name "PDV SAT Pro" --target-architecture universal2 main.py
+      - name: Criar DMG
+        run: |
+          mkdir dmg-root
+          cp -R "dist/PDV SAT Pro.app" dmg-root/
+          hdiutil create -volname "PDV SAT Pro" -srcfolder dmg-root -ov -format UDZO "dist/PDV-SAT-Pro-macOS-Universal.dmg"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PDV-SAT-Pro-macOS-Universal
+          path: dist/PDV-SAT-Pro-macOS-Universal.dmg
+
+  linux:
+    needs: test
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libegl1 libgl1 libxcb-cursor0 libxkbcommon-x11-0 libfuse2
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m pip install -r requirements.txt
+      - run: python -m PyInstaller --noconfirm --clean pdv_sat_pro.spec
+      - name: Montar AppImage
+        run: |
+          mkdir -p AppDir/usr/bin AppDir/usr/share/applications
+          cp dist/PDV-SAT-Pro AppDir/usr/bin/
+          printf '[Desktop Entry]\nType=Application\nName=PDV SAT Pro\nExec=PDV-SAT-Pro\nIcon=pdv-sat-pro\nCategories=Office;Finance;\n' > AppDir/usr/share/applications/pdv-sat-pro.desktop
+          cp AppDir/usr/share/applications/pdv-sat-pro.desktop AppDir/
+          printf '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" rx="48" fill="#0b0e13"/><text x="128" y="145" text-anchor="middle" font-family="sans-serif" font-size="74" font-weight="bold" fill="#f3c623">PDV</text></svg>' > AppDir/pdv-sat-pro.svg
+          curl -L -o appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool
+          ARCH=x86_64 ./appimagetool AppDir dist/PDV-SAT-Pro-Linux-x86_64.AppImage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PDV-SAT-Pro-Linux-x86_64
+          path: dist/PDV-SAT-Pro-Linux-x86_64.AppImage
+

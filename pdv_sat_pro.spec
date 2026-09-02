@@ -1,0 +1,9 @@
+from PyInstaller.utils.hooks import collect_data_files
+
+datas = collect_data_files("PySide6")
+a = Analysis(["main.py"], pathex=[], binaries=[], datas=datas, hiddenimports=["sqlalchemy.dialects.sqlite"],
+             hookspath=[], hooksconfig={}, runtime_hooks=[], excludes=[], noarchive=False)
+pyz = PYZ(a.pure)
+exe = EXE(pyz, a.scripts, a.binaries, a.datas, [], name="PDV-SAT-Pro", debug=False,
+          bootloader_ignore_signals=False, strip=False, upx=True, console=False,
+          icon=None)

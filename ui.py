@@ -1,0 +1,77 @@
+from __future__ import annotations
+from decimal import Decimal
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
+    QPushButton, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox, QComboBox, QInputDialog, QFrame)
+from domain import Cart, money
+from database import find_product, persist_sale
+from config_dialog import FiscalConfigDialog
+from fiscal import create_fiscal
+
+STYLE = """
+QWidget{background:#0b0e13;color:#eef2f7;font:14px 'Segoe UI'}
+QFrame#side{background:#121722;border:1px solid #222a38;border-radius:16px}
+QLineEdit,QComboBox{background:#171d28;border:1px solid #2b3445;border-radius:10px;padding:12px}
+QLineEdit:focus{border:1px solid #f3c623}
+QPushButton{background:#202838;border:0;border-radius:10px;padding:12px;font-weight:600}
+QPushButton:hover{background:#2a354a} QPushButton#primary{background:#f3c623;color:#121212}
+QTableWidget{background:#111620;border:0;gridline-color:#273043;border-radius:12px}
+QHeaderView::section{background:#171d28;color:#9ca8ba;border:0;padding:10px}
+QLabel#brand{font-size:25px;font-weight:800;color:#f3c623} QLabel#total{font-size:42px;font-weight:800;color:#f3c623}
+"""
+
+class MainWindow(QMainWindow):
+    def __init__(self, sat):
+        super().__init__(); self.sat=sat; self.cart=Cart()
+        self.setWindowTitle("PDV SAT Pro"); self.resize(1180, 720); self.setStyleSheet(STYLE)
+        root=QWidget(); self.setCentralWidget(root); layout=QHBoxLayout(root); layout.setContentsMargins(22,22,22,22); layout.setSpacing(18)
+        left=QVBoxLayout(); brand=QLabel("PDV  /  SAT PRO"); brand.setObjectName("brand"); left.addWidget(brand)
+        self.search=QLineEdit(); self.search.setPlaceholderText("Código de barras ou nome do produto  •  F2"); self.search.returnPressed.connect(self.add_product); left.addWidget(self.search)
+        self.table=QTableWidget(0,5); self.table.setHorizontalHeaderLabels(["Produto","Qtd.","Unitário","Total",""])
+        self.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch); self.table.setSelectionBehavior(QTableWidget.SelectRows); left.addWidget(self.table)
+        footer=QHBoxLayout(); hint=QLabel("F2 Buscar   •   F4 Finalizar   •   F8 Cancelar venda"); hint.setStyleSheet("color:#7f8ba0"); settings=QPushButton("Configuração fiscal"); settings.clicked.connect(self.open_settings); footer.addWidget(hint); footer.addStretch(); footer.addWidget(settings); left.addLayout(footer); layout.addLayout(left,3)
+        side=QFrame(); side.setObjectName("side"); sv=QVBoxLayout(side); sv.setContentsMargins(24,24,24,24)
+        sv.addWidget(QLabel("RESUMO DA VENDA")); self.count=QLabel("0 itens"); sv.addWidget(self.count); sv.addStretch()
+        sv.addWidget(QLabel("TOTAL")); self.total=QLabel("R$ 0,00"); self.total.setObjectName("total"); sv.addWidget(self.total)
+        self.payment=QComboBox(); self.payment.addItems(["PIX","Cartão de débito","Cartão de crédito","Dinheiro"]); sv.addWidget(self.payment)
+        discount=QPushButton("Aplicar desconto"); discount.clicked.connect(self.apply_discount); sv.addWidget(discount)
+        finish=QPushButton("Finalizar venda  F4"); finish.setObjectName("primary"); finish.clicked.connect(self.finish); sv.addWidget(finish)
+        self.fiscal_status=QLabel(self.sat.status()); self.fiscal_status.setWordWrap(True); self.fiscal_status.setStyleSheet("color:#7ee2a8;margin-top:10px"); sv.addWidget(self.fiscal_status); layout.addWidget(side,1)
+        QShortcut(QKeySequence("F2"),self,self.search.setFocus); QShortcut(QKeySequence("F4"),self,self.finish); QShortcut(QKeySequence("F8"),self,self.cancel)
+        self.search.setFocus()
+
+    def add_product(self):
+        p=find_product(self.search.text())
+        if not p: QMessageBox.warning(self,"Produto","Produto não encontrado."); return
+        self.cart.add(p); self.search.clear(); self.refresh()
+
+    def open_settings(self):
+        if FiscalConfigDialog(self).exec():
+            self.sat=create_fiscal(); self.fiscal_status.setText(self.sat.status())
+
+    def refresh(self):
+        self.table.setRowCount(0)
+        for index,item in enumerate(self.cart.items):
+            row=self.table.rowCount(); self.table.insertRow(row)
+            values=[item.product.name,str(item.quantity),f"R$ {item.product.price:.2f}",f"R$ {item.total:.2f}"]
+            for col,value in enumerate(values): self.table.setItem(row,col,QTableWidgetItem(value))
+            remove=QPushButton("Remover"); remove.clicked.connect(lambda _,i=index:self.remove(i)); self.table.setCellWidget(row,4,remove)
+        qty=sum((i.quantity for i in self.cart.items),Decimal("0")); self.count.setText(f"{qty} item(ns)")
+        self.total.setText("R$ "+f"{self.cart.total:,.2f}".replace(",","X").replace(".",",").replace("X","."))
+
+    def remove(self,index): self.cart.items.pop(index); self.refresh()
+    def apply_discount(self):
+        value,ok=QInputDialog.getDouble(self,"Desconto","Valor do desconto (R$):",float(self.cart.discount),0,float(self.cart.subtotal),2)
+        if ok: self.cart.discount=money(value); self.refresh()
+    def cancel(self):
+        if self.cart.items and QMessageBox.question(self,"Cancelar","Cancelar a venda atual?")==QMessageBox.Yes: self.cart=Cart(); self.refresh()
+    def finish(self):
+        if not self.cart.items: QMessageBox.information(self,"Venda","Adicione produtos ao carrinho."); return
+        try:
+            result=self.sat.authorize(self.cart,self.payment.currentText())
+            if not result.success: raise RuntimeError("SAT recusou a venda: "+result.raw)
+            sale_id=persist_sale(self.cart,self.payment.currentText(),result.key)
+            QMessageBox.information(self,"Venda concluída",f"Venda #{sale_id} autorizada.\nChave: {result.key}")
+            self.cart=Cart(); self.refresh(); self.search.setFocus()
+        except Exception as exc: QMessageBox.critical(self,"Falha ao finalizar",str(exc))

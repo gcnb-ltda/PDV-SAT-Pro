@@ -1,0 +1,9 @@
+.venv/
+build/
+dist/
+*.pyc
+__pycache__/
+.env
+pdv.db
+*.spec.bak
+
