@@ -17,6 +17,8 @@ jobs:
         with: {python-version: "3.12"}
       - run: pip install -r requirements.txt
       - run: pytest -q
+        env:
+          PYTHONPATH: .
 
   windows:
     needs: test
@@ -85,4 +87,3 @@ jobs:
         with:
           name: PDV-SAT-Pro-Linux-x86_64
           path: dist/PDV-SAT-Pro-Linux-x86_64.AppImage
-
