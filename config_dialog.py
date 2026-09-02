@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import (QDialog,QFormLayout,QLineEdit,QComboBox,QPushButton,QHBoxLayout,
-                               QVBoxLayout,QFileDialog,QLabel,QStackedWidget,QWidget,QMessageBox)
+from qt_compat import (QDialog,QFormLayout,QLineEdit,QComboBox,QPushButton,QHBoxLayout,
+                       QVBoxLayout,QFileDialog,QLabel,QStackedWidget,QWidget,QMessageBox)
 from settings import load_settings, save_settings
 
 class FiscalConfigDialog(QDialog):
@@ -31,4 +31,3 @@ class FiscalConfigDialog(QDialog):
         if not self.cnpj.text().strip(): QMessageBox.warning(self,"Configuração","Informe o CNPJ."); return
         values={"fiscal_type":self.kind.currentText(),"cnpj":self.cnpj.text(),"ie":self.ie.text(),"uf":self.uf.text().upper(),"environment":self.env.currentText(),"sat_dll":self.sat_dll.text(),"sat_code":self.sat_code.text(),"sat_number":self.sat_number.text(),"nfce_certificate":self.cert.text(),"nfce_password":self.cert_pass.text(),"nfce_csc":self.csc.text(),"nfce_csc_id":self.csc_id.text(),"nfce_series":self.series.text(),"nfce_last_number":self.last.text()}
         save_settings(values); self.accept()
-
