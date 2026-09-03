@@ -12,3 +12,8 @@ except ImportError:
 
 def dialog_exec(dialog):
     return dialog.exec() if QT_VERSION == 6 else dialog.exec_()
+
+def application_exec(application):
+    """Inicia o event loop usando a API correta do PySide instalado."""
+    runner=getattr(application,"exec",None)
+    return runner() if callable(runner) else application.exec_()
