@@ -32,6 +32,12 @@ def customer_document(value) -> str:
 def money(value) -> Decimal:
     return Decimal(str(value)).quantize(MONEY, rounding=ROUND_HALF_UP)
 
+def discount_from_percentage(subtotal, percentage) -> Decimal:
+    percent=Decimal(str(percentage))
+    if percent < 0 or percent > 100:
+        raise ValueError("A porcentagem do desconto deve estar entre 0 e 100%.")
+    return money(Decimal(str(subtotal))*percent/Decimal("100"))
+
 @dataclass(frozen=True)
 class Product:
     id: int
