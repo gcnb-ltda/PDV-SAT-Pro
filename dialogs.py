@@ -1,13 +1,14 @@
 from decimal import Decimal
 from qt_compat import (QDialog,QVBoxLayout,QHBoxLayout,QFormLayout,QLineEdit,QPushButton,QTableWidget,
     QTableWidgetItem,QHeaderView,QMessageBox,QComboBox,QCheckBox,QDoubleSpinBox,QLabel,QFileDialog,
-    dialog_exec)
+    QScrollArea,QWidget,dialog_exec)
 from database import list_products,save_product,list_sales
 from backup import create_backup,restore_backup
 
 class ProductEditDialog(QDialog):
     def __init__(self,row=None,parent=None):
-        super().__init__(parent); self.row=row; self.setWindowTitle("Produto"); form=QFormLayout(self)
+        super().__init__(parent); self.row=row; self.setWindowTitle("Produto"); self.resize(620,720)
+        root=QVBoxLayout(self); scroll=QScrollArea(); scroll.setWidgetResizable(True); page=QWidget(); form=QFormLayout(page); scroll.setWidget(page); root.addWidget(scroll)
         def field(value=""): return QLineEdit(str(value or ""))
         self.barcode=field(getattr(row,"barcode","")); self.name=field(getattr(row,"name",""))
         self.price=QDoubleSpinBox(); self.price.setMaximum(9_999_999); self.price.setDecimals(2); self.price.setValue(float(getattr(row,"price",0)))
@@ -16,7 +17,7 @@ class ProductEditDialog(QDialog):
         self.min_stock=QDoubleSpinBox(); self.min_stock.setMaximum(9_999_999); self.min_stock.setDecimals(3); self.min_stock.setValue(float(getattr(row,"min_stock",0)))
         self.unit=field(getattr(row,"unit","UN")); self.category=field(getattr(row,"category","Geral")); self.ncm=field(getattr(row,"ncm","")); self.cfop=field(getattr(row,"cfop","5102")); self.origin=field(getattr(row,"origin","")); self.icms_cst=field(getattr(row,"icms_cst","")); self.icms_rate=field(getattr(row,"icms_rate","0")); self.pis_cst=field(getattr(row,"pis_cst","")); self.pis_rate=field(getattr(row,"pis_rate","0")); self.cofins_cst=field(getattr(row,"cofins_cst","")); self.cofins_rate=field(getattr(row,"cofins_rate","0")); self.cest=field(getattr(row,"cest","")); self.ibscbs_cst=field(getattr(row,"ibscbs_cst","")); self.tax_classification=field(getattr(row,"tax_classification","")); self.ibs_state_rate=field(getattr(row,"ibs_state_rate","0")); self.ibs_city_rate=field(getattr(row,"ibs_city_rate","0")); self.cbs_rate=field(getattr(row,"cbs_rate","0")); self.active=QCheckBox(); self.active.setChecked(bool(getattr(row,"active",1)))
         for label,widget in (("Código de barras",self.barcode),("Descrição",self.name),("Preço de venda",self.price),("Custo",self.cost),("Estoque",self.stock),("Estoque mínimo",self.min_stock),("Unidade",self.unit),("Categoria",self.category),("NCM",self.ncm),("CEST",self.cest),("CFOP",self.cfop),("Origem ICMS",self.origin),("CST/CSOSN ICMS",self.icms_cst),("Alíquota ICMS %",self.icms_rate),("CST PIS",self.pis_cst),("Alíquota PIS %",self.pis_rate),("CST COFINS",self.cofins_cst),("Alíquota COFINS %",self.cofins_rate),("CST IBS/CBS",self.ibscbs_cst),("Classificação tributária IBS/CBS",self.tax_classification),("Alíquota IBS UF %",self.ibs_state_rate),("Alíquota IBS Município %",self.ibs_city_rate),("Alíquota CBS %",self.cbs_rate),("Ativo",self.active)): form.addRow(label,widget)
-        save=QPushButton("Salvar"); save.setObjectName("primary"); save.clicked.connect(self.persist); form.addRow(save)
+        save=QPushButton("Salvar produto"); save.setObjectName("primary"); save.setMinimumHeight(44); save.clicked.connect(self.persist); root.addWidget(save)
     def persist(self):
         if not self.barcode.text().strip() or not self.name.text().strip(): QMessageBox.warning(self,"Produto","Código e descrição são obrigatórios."); return
         if len(self.ncm.text().strip()) not in (0,8): QMessageBox.warning(self,"Produto","NCM deve possuir 8 dígitos."); return
