@@ -8,7 +8,7 @@ class NfceSimulator:
     def status(self):
         env=self.config.get("environment","homologacao").upper()
         return f"NFC-e {env} — CONFIGURADA / SIMULADOR"
-    def authorize(self, cart, payment):
+    def authorize(self, cart, payment, customer_document=""):
         seed=f'{self.config.get("cnpj")}{datetime.now().isoformat()}{uuid.uuid4()}'
         key="SIM-NFCE-"+hashlib.sha256(seed.encode()).hexdigest()[:32].upper()
         return FiscalResult(True,key,"100|Autorizado o uso da NF-e|"+key)
@@ -21,7 +21,7 @@ class NfceSefaz:
     """
     def __init__(self, config): self.config=config
     def status(self): return "NFC-e REAL — CONECTOR PENDENTE DE PROVEDOR FISCAL"
-    def authorize(self, cart, payment):
+    def authorize(self, cart, payment, customer_document=""):
         raise RuntimeError("Configure o provedor NFC-e homologado no adaptador NfceSefaz.")
 
 def create_nfce(config):
