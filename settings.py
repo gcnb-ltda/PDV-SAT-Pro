@@ -6,7 +6,7 @@ from pathlib import Path
 
 CONFIG_FILE = Path(user_config_dir("PDV-SAT-Pro", "GCNB")) / "fiscal.json"
 KEYRING_SERVICE = "GCNB.PDV-SAT-Pro"
-SECRET_KEYS = ("sat_code", "nfce_password", "nfce_csc", "focus_token")
+SECRET_KEYS = ("sat_code", "nfce_password", "nfce_csc")
 
 DEFAULTS = {
     "fiscal_type": "NFC-e", "environment": "homologacao", "uf": "SP",
@@ -16,7 +16,7 @@ DEFAULTS = {
     "company_name": "GCNB LTDA", "operator_name": "ADMIN", "report_role": "ADMIN",
     "printer_name": "", "printer_paper": "80", "printer_copies": "1",
     "printer_auto": False, "printer_header": "", "printer_footer": "Obrigado pela preferência",
-    "nfce_provider": "Focus NFe", "focus_token": "", "tax_regime": "3"
+    "nfce_provider": "SEFAZ Direta", "tax_regime": "3"
 }
 
 VALID_UFS={"AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"}
@@ -50,9 +50,7 @@ def validate_fiscal_settings(values):
     if values.get("environment") == "producao" and values.get("fiscal_type") == "SAT": raise ValueError("SAT não está habilitado para produção. Utilize NFC-e.")
     required = ["cnpj", "ie", "uf"]
     if values.get("fiscal_type") == "SAT": required += ["sat_dll", "sat_code"]
-    else:
-        if values.get("nfce_provider") == "Focus NFe": required += ["focus_token"]
-        else: required += ["nfce_certificate", "nfce_password", "nfce_csc", "nfce_csc_id", "nfce_series"]
+    else: required += ["nfce_certificate", "nfce_password", "nfce_csc", "nfce_csc_id", "nfce_series"]
     missing = [key for key in required if not str(values.get(key, "")).strip()]
     if values.get("environment") == "producao" and missing:
         raise ValueError("Produção exige: " + ", ".join(missing))
