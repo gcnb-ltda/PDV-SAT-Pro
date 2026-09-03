@@ -8,6 +8,7 @@ from database import find_product, persist_sale, check_stock
 from config_dialog import FiscalConfigDialog
 from fiscal import create_fiscal
 from dialogs import ProductsDialog,SalesHistoryDialog,BackupDialog
+from report_dialog import ReportsDialog,DashboardDialog
 from settings import load_settings
 from audit import logger
 
@@ -33,9 +34,9 @@ class MainWindow(QMainWindow):
         self.table=QTableWidget(0,5); self.table.setHorizontalHeaderLabels(["Produto","Qtd.","Unitário","Total",""])
         self.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch); self.table.setSelectionBehavior(QTableWidget.SelectRows); self.table.doubleClicked.connect(self.edit_quantity); left.addWidget(self.table)
         footer=QHBoxLayout(); hint=QLabel("F2 Buscar   •   F4 Finalizar   •   F8 Cancelar venda"); hint.setStyleSheet("color:#7f8ba0")
-        products=QPushButton("Produtos"); history=QPushButton("Histórico"); backup=QPushButton("Backup"); settings=QPushButton("Configuração fiscal")
-        products.clicked.connect(lambda:dialog_exec(ProductsDialog(self))); history.clicked.connect(lambda:dialog_exec(SalesHistoryDialog(self))); backup.clicked.connect(lambda:dialog_exec(BackupDialog(self))); settings.clicked.connect(self.open_settings)
-        footer.addWidget(hint); footer.addStretch(); footer.addWidget(products); footer.addWidget(history); footer.addWidget(backup); footer.addWidget(settings); left.addLayout(footer); layout.addLayout(left,3)
+        products=QPushButton("Produtos"); history=QPushButton("Histórico"); reports=QPushButton("Relatórios"); dashboard=QPushButton("Painel"); backup=QPushButton("Backup"); settings=QPushButton("Configuração fiscal")
+        products.clicked.connect(lambda:dialog_exec(ProductsDialog(self))); history.clicked.connect(lambda:dialog_exec(SalesHistoryDialog(self))); reports.clicked.connect(lambda:dialog_exec(ReportsDialog(self))); dashboard.clicked.connect(lambda:dialog_exec(DashboardDialog(self))); backup.clicked.connect(lambda:dialog_exec(BackupDialog(self))); settings.clicked.connect(self.open_settings)
+        footer.addWidget(hint); footer.addStretch(); footer.addWidget(products); footer.addWidget(history); footer.addWidget(reports); footer.addWidget(dashboard); footer.addWidget(backup); footer.addWidget(settings); left.addLayout(footer); layout.addLayout(left,3)
         side=QFrame(); side.setObjectName("side"); sv=QVBoxLayout(side); sv.setContentsMargins(24,24,24,24)
         sv.addWidget(QLabel("RESUMO DA VENDA")); self.count=QLabel("0 itens"); sv.addWidget(self.count); sv.addStretch()
         sv.addWidget(QLabel("TOTAL")); self.total=QLabel("R$ 0,00"); self.total.setObjectName("total"); sv.addWidget(self.total)
@@ -105,7 +106,8 @@ class MainWindow(QMainWindow):
             document=customer_document(self.customer.text())
             result=self.sat.authorize(self.cart,self.payment.currentText(),document)
             if not result.success: raise RuntimeError("Emissor fiscal recusou a venda: "+result.raw)
-            sale_id=persist_sale(self.cart,self.payment.currentText(),result.key,document)
+            config=load_settings()
+            sale_id=persist_sale(self.cart,self.payment.currentText(),result.key,document,config.get("fiscal_type", ""))
             logger.info("Venda %s concluída; emissor=%s",sale_id,type(self.sat).__name__)
             QMessageBox.information(self,"Venda concluída",f"Venda #{sale_id} autorizada.\nChave: {result.key}")
             self.cart=Cart(); self.received.clear(); self.customer.clear(); self.refresh(); self.search.setFocus()
