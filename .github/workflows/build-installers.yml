@@ -94,8 +94,12 @@ jobs:
       - run: python -m PyInstaller --noconfirm --clean pdv_sat_pro.spec
       - name: Montar AppImage
         run: |
-          mkdir -p AppDir/usr/bin AppDir/usr/share/applications
+          mkdir -p AppDir/usr/bin AppDir/usr/lib AppDir/usr/share/applications
           cp dist/PDV-SAT-Pro AppDir/usr/bin/
+          cp -L /usr/lib/x86_64-linux-gnu/libEGL.so.1 AppDir/usr/lib/
+          cp -L /usr/lib/x86_64-linux-gnu/libGL.so.1 AppDir/usr/lib/
+          printf '#!/bin/sh\nHERE="$(dirname "$(readlink -f "$0")")"\nexport LD_LIBRARY_PATH="$HERE/usr/lib:${LD_LIBRARY_PATH:-}"\nexec "$HERE/usr/bin/PDV-SAT-Pro" "$@"\n' > AppDir/AppRun
+          chmod +x AppDir/AppRun
           printf '[Desktop Entry]\nType=Application\nName=PDV SAT Pro\nExec=PDV-SAT-Pro\nIcon=pdv-sat-pro\nCategories=Office;Finance;\n' > AppDir/usr/share/applications/pdv-sat-pro.desktop
           cp AppDir/usr/share/applications/pdv-sat-pro.desktop AppDir/
           printf '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" rx="48" fill="#0b0e13"/><text x="128" y="145" text-anchor="middle" font-family="sans-serif" font-size="74" font-weight="bold" fill="#f3c623">PDV</text></svg>' > AppDir/pdv-sat-pro.svg
