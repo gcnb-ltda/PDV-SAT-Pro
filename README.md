@@ -2,7 +2,11 @@
 
 PDV desktop moderno em Python, com produtos, pesquisa por código de barras, carrinho, desconto, múltiplas formas de pagamento, fechamento de venda, estoque e emissão fiscal configurável entre SAT e NFC-e.
 
-Inclui cadastro completo de produtos, edição de quantidade, limite de desconto, cálculo de troco, histórico, backup/restauração, auditoria e armazenamento de credenciais no cofre do sistema operacional. Consulte `REQUISITOS.md` e `COBERTURA_REQUISITOS.md`.
+Inclui cadastro completo de produtos, edição de quantidade, limite de desconto, cálculo de troco, histórico, backup/restauração, auditoria, central de relatórios, painel gerencial e armazenamento de credenciais no cofre do sistema operacional. Consulte `REQUISITOS.md` e `COBERTURA_REQUISITOS.md`.
+
+## Relatórios
+
+O botão **Relatórios** abre a central com filtros por período, pesquisa e pagamento. Estão disponíveis relatórios de vendas, fechamento de caixa, resumo diário, produtos vendidos, ranking, produtos sem movimentação, posição e mínimo de estoque, movimentações, rentabilidade, descontos, cancelamentos, pagamentos, operadores, documentos e inconsistências fiscais, base fiscal por NCM, clientes, Curva ABC e auditoria. Os resultados podem ser exportados em CSV, XLSX e PDF. O botão **Painel** apresenta indicadores gerenciais dos últimos 30 dias.
 
 ## Instalação rápida
 
