@@ -37,10 +37,11 @@ class ReportsDialog(QDialog):
         self.summary=QLabel("Selecione um relatório e clique em Gerar relatório."); root.addWidget(self.summary)
         self.chart=ReportChart(); root.addWidget(self.chart)
         self.table=QTableWidget(); self.table.setSortingEnabled(True); self.table.setAlternatingRowColors(True); root.addWidget(self.table)
-        self.page=0; self.page_size=100; pager=QHBoxLayout(); previous=QPushButton("Página anterior"); next_page=QPushButton("Próxima página"); self.page_label=QLabel(); previous.clicked.connect(lambda:self.change_page(-1)); next_page.clicked.connect(lambda:self.change_page(1)); pager.addWidget(previous); pager.addWidget(self.page_label); pager.addWidget(next_page); pager.addStretch(); root.addLayout(pager)
-        actions=QHBoxLayout(); schedule=QPushButton("Agendar relatórios"); schedule.clicked.connect(lambda:dialog_exec(SchedulesDialog(self))); actions.addWidget(schedule); actions.addStretch()
+        self.page=0; self.page_size=100; pager=QHBoxLayout(); previous=QPushButton("Página anterior"); next_page=QPushButton("Próxima página"); self.page_label=QLabel(); previous.clicked.connect(lambda checked=False:self.change_page(-1)); next_page.clicked.connect(lambda checked=False:self.change_page(1)); pager.addWidget(previous); pager.addWidget(self.page_label); pager.addWidget(next_page); pager.addStretch(); root.addLayout(pager)
+        actions=QHBoxLayout(); schedule=QPushButton("Agendar relatórios"); schedule.clicked.connect(lambda checked=False:dialog_exec(SchedulesDialog(self))); actions.addWidget(schedule); actions.addStretch()
+        self.export_buttons={}
         for label,ext in (("Exportar CSV","csv"),("Exportar XLSX","xlsx"),("Exportar PDF / Imprimir","pdf")):
-            button=QPushButton(label); button.clicked.connect(lambda _,e=ext:self.export(e)); actions.addWidget(button)
+            button=QPushButton(label); button.setObjectName("export_"+ext); button.clicked.connect(lambda checked=False,e=ext:self.export(e)); actions.addWidget(button); self.export_buttons[ext]=button
         root.addLayout(actions); self.current=None; self.generate()
 
     def generate(self):
