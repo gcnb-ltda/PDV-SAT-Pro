@@ -60,8 +60,13 @@ class MainWindow(QMainWindow):
         except Exception as exc: QMessageBox.warning(self,"Produto",str(exc))
 
     def open_settings(self):
-        if dialog_exec(FiscalConfigDialog(self)):
-            self.sat=create_fiscal(); self.fiscal_status.setText(self.sat.status())
+        try:
+            dialog=FiscalConfigDialog(self)
+            if dialog_exec(dialog):
+                self.sat=create_fiscal(); self.fiscal_status.setText(self.sat.status())
+        except Exception as exc:
+            logger.exception("Falha ao abrir configuração fiscal")
+            QMessageBox.critical(self,"Configuração fiscal",f"Não foi possível abrir a configuração fiscal:\n{exc}")
 
     def refresh(self):
         self.table.setRowCount(0)
