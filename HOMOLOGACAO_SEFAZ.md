@@ -6,9 +6,12 @@ contingência offline, QR Code v3/CSC, validação XSD e armazenamento atômico.
 
 ## Bloqueio intencional
 
-nfce_direct_enabled e sefaz_homologation_approved permanecem false. Não altere
-para produção antes de executar a bateria oficial com certificado e CSC de
-homologação da empresa na UF. Homologação não é credenciamento.
+Cada comprador cadastra seus próprios dados em Configuração fiscal e ativação.
+O botão de validação confere o A1 e consulta o status da SEFAZ. Somente após
+retorno 107 e confirmação de credenciamento a opção de emissão real pode ser
+salva. Qualquer mudança nos dados fiscais invalida a liberação anterior.
+
+Não altere manualmente as flags internas. Homologação não é credenciamento.
 
 ## Checklist por UF
 
