@@ -60,7 +60,7 @@ Este documento define os requisitos funcionais e não funcionais do software. A 
 | RF52 | O sistema deve manter a configuração fiscal SAT/NFC-e separada da configuração da impressora de cupom. |
 | RF53 | O sistema deve permitir selecionar a impressora, configurar papel de 58 ou 80 mm, número de vias e impressão automática. |
 | RF54 | O sistema deve permitir testar a impressora e imprimir o extrato da venda somente após sua autorização e gravação. |
-| RF55 | O sistema deve autorizar NFC-e em produção por provedor fiscal nacional, com ambientes separados, token protegido, referência única, validação tributária dos itens e tratamento de autorização ou rejeição da SEFAZ. |
+| RF55 | O sistema deve autorizar NFC-e diretamente nos Web Services da SEFAZ estadual ou virtual, sem API fiscal intermediária, mantendo ambientes separados, certificado e CSC protegidos e tratamento de autorização ou rejeição. |
 
 ## Requisitos não funcionais
 
