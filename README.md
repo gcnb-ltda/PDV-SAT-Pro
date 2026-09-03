@@ -7,6 +7,10 @@ XMLDSig, SOAP mTLS, XSD, QR Code/CSC, status, autorização, cancelamento,
 inutilização, contingência e armazenamento. Permanece em simulação até a
 homologação real por UF. Consulte HOMOLOGACAO_SEFAZ.md.
 
+O instalador não contém CNPJ, certificado ou CSC do fabricante. Cada comprador
+faz o autocadastro no módulo Configuração fiscal e ativação. Segredos ficam no
+cofre de credenciais do sistema operacional do próprio cliente.
+
 PDV desktop moderno em Python, com produtos, pesquisa por código de barras, carrinho, desconto, múltiplas formas de pagamento, fechamento de venda, estoque e emissão fiscal configurável entre SAT e NFC-e.
 
 Inclui cadastro completo de produtos, edição de quantidade, limite de desconto, cálculo de troco, histórico, backup/restauração, auditoria, central de relatórios, painel gerencial e armazenamento de credenciais no cofre do sistema operacional. Consulte `REQUISITOS.md` e `COBERTURA_REQUISITOS.md`.
