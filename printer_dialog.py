@@ -8,15 +8,24 @@ class PrinterConfigDialog(QDialog):
     def __init__(self,parent=None):
         super().__init__(parent); self.setWindowTitle("Configuração da impressora"); self.resize(520,390); self.data=load_settings(); root=QVBoxLayout(self); root.addWidget(QLabel("IMPRESSORA DE CUPOM / EXTRATO FISCAL")); form=QFormLayout()
         self.printer=QComboBox(); self.printer.setEditable(True); self.printer.addItems(available_printers()); self.printer.setCurrentText(self.data.get("printer_name",""))
+        self.detected=QLabel(); self.update_detection_status(); self.printer.currentTextChanged.connect(lambda checked=False:self.update_detection_status())
         self.paper=QComboBox(); self.paper.addItems(["58","80"]); self.paper.setCurrentText(str(self.data.get("printer_paper","80")))
         self.copies=QSpinBox(); self.copies.setRange(1,5); self.copies.setValue(int(self.data.get("printer_copies","1")))
         self.auto=QCheckBox("Imprimir automaticamente após venda autorizada"); self.auto.setChecked(bool(self.data.get("printer_auto",False)))
         self.header=QLineEdit(self.data.get("printer_header","")); self.footer=QLineEdit(self.data.get("printer_footer",""))
-        form.addRow("Impressora",self.printer); form.addRow("Largura do papel (mm)",self.paper); form.addRow("Número de vias",self.copies); form.addRow("Cabeçalho adicional",self.header); form.addRow("Rodapé",self.footer); form.addRow("",self.auto); root.addLayout(form)
-        info=QLabel("O SAT autoriza o CF-e e a impressora térmica imprime o extrato. Ambos são configurados separadamente."); info.setWordWrap(True); root.addWidget(info)
+        form.addRow("Impressora",self.printer); form.addRow("Conexão",self.detected); form.addRow("Largura do papel (mm)",self.paper); form.addRow("Número de vias",self.copies); form.addRow("Cabeçalho adicional",self.header); form.addRow("Rodapé",self.footer); form.addRow("",self.auto); root.addLayout(form)
+        info=QLabel("SAT ou NFC-e autorizam o documento fiscal; a impressora térmica imprime o respectivo extrato. A configuração da impressora é independente do emissor."); info.setWordWrap(True); root.addWidget(info)
         buttons=QHBoxLayout(); test=QPushButton("Testar impressão"); save=QPushButton("Salvar"); save.setObjectName("primary"); cancel=QPushButton("Cancelar"); test.clicked.connect(self.test); save.clicked.connect(self.persist); cancel.clicked.connect(self.reject); buttons.addWidget(test); buttons.addStretch(); buttons.addWidget(cancel); buttons.addWidget(save); root.addLayout(buttons)
     def values(self):
         return {"printer_name":self.printer.currentText().strip(),"printer_paper":self.paper.currentText(),"printer_copies":str(self.copies.value()),"printer_auto":self.auto.isChecked(),"printer_header":self.header.text(),"printer_footer":self.footer.text()}
+    def update_detection_status(self):
+        names=available_printers(); selected=self.printer.currentText().strip()
+        if selected and selected in names:
+            self.detected.setText("Detectada pelo sistema operacional"); self.detected.setStyleSheet("color:#7ee2a8")
+        elif names:
+            self.detected.setText(f"{len(names)} impressora(s) disponível(is); selecione uma")
+        else:
+            self.detected.setText("Nenhuma impressora detectada"); self.detected.setStyleSheet("color:#ffb86c")
     def test(self):
         try:
             values=load_settings()|self.values(); html=f"<h2>{values.get('company_name','PDV SAT Pro')}</h2><p>TESTE DE IMPRESSÃO</p><p>Papel {values['printer_paper']} mm</p>"
