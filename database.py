@@ -32,6 +32,11 @@ class ProductRow(Base):
     cofins_cst: Mapped[str] = mapped_column(String(3), default="")
     cofins_rate: Mapped[Decimal] = mapped_column(Numeric(7,4), default=0)
     cest: Mapped[str] = mapped_column(String(7), default="")
+    ibscbs_cst: Mapped[str] = mapped_column(String(3), default="")
+    tax_classification: Mapped[str] = mapped_column(String(6), default="")
+    ibs_state_rate: Mapped[Decimal] = mapped_column(Numeric(7,4), default=0)
+    ibs_city_rate: Mapped[Decimal] = mapped_column(Numeric(7,4), default=0)
+    cbs_rate: Mapped[Decimal] = mapped_column(Numeric(7,4), default=0)
 
 class SaleRow(Base):
     __tablename__ = "sales"
@@ -87,6 +92,8 @@ def init_db():
         if "category" not in columns: conn.execute(text("ALTER TABLE products ADD COLUMN category VARCHAR(60) DEFAULT 'Geral'"))
         for name,definition in (("origin","VARCHAR(2) DEFAULT ''"),("icms_cst","VARCHAR(4) DEFAULT ''"),("icms_rate","NUMERIC(7,4) DEFAULT 0"),("pis_cst","VARCHAR(3) DEFAULT ''"),("pis_rate","NUMERIC(7,4) DEFAULT 0"),("cofins_cst","VARCHAR(3) DEFAULT ''"),("cofins_rate","NUMERIC(7,4) DEFAULT 0"),("cest","VARCHAR(7) DEFAULT ''")):
             if name not in columns: conn.execute(text(f"ALTER TABLE products ADD COLUMN {name} {definition}"))
+        for name,definition in (("ibscbs_cst","VARCHAR(3) DEFAULT ''"),("tax_classification","VARCHAR(6) DEFAULT ''"),("ibs_state_rate","NUMERIC(7,4) DEFAULT 0"),("ibs_city_rate","NUMERIC(7,4) DEFAULT 0"),("cbs_rate","NUMERIC(7,4) DEFAULT 0")):
+            if name not in columns: conn.execute(text(f"ALTER TABLE products ADD COLUMN {name} {definition}"))
         sale_columns={row[1] for row in conn.execute(text("PRAGMA table_info(sales)"))}
         if "customer_document" not in sale_columns: conn.execute(text("ALTER TABLE sales ADD COLUMN customer_document VARCHAR(14) DEFAULT ''"))
         if "operator" not in sale_columns: conn.execute(text("ALTER TABLE sales ADD COLUMN operator VARCHAR(60) DEFAULT 'ADMIN'"))
@@ -103,7 +110,7 @@ def init_db():
             ])
 
 def to_product(row):
-    return Product(row.id,row.barcode,row.name,row.price,row.stock,row.ncm,row.cfop,row.unit,row.origin,row.icms_cst,row.icms_rate,row.pis_cst,row.pis_rate,row.cofins_cst,row.cofins_rate,row.cest)
+    return Product(row.id,row.barcode,row.name,row.price,row.stock,row.ncm,row.cfop,row.unit,row.origin,row.icms_cst,row.icms_rate,row.pis_cst,row.pis_rate,row.cofins_cst,row.cofins_rate,row.cest,row.ibscbs_cst,row.tax_classification,row.ibs_state_rate,row.ibs_city_rate,row.cbs_rate)
 
 def find_product(term: str):
     with Session() as s:
@@ -144,7 +151,7 @@ def save_product(data, product_id=None):
         if product_id: duplicate=duplicate.filter(ProductRow.id != product_id)
         if duplicate.first(): raise ValueError("Código de barras já cadastrado.")
         old_stock = Decimal(str(row.stock or 0)) if product_id else Decimal("0")
-        for key in ("barcode","name","price","stock","ncm","cfop","unit","active","cost","min_stock","category","origin","icms_cst","icms_rate","pis_cst","pis_rate","cofins_cst","cofins_rate","cest"):
+        for key in ("barcode","name","price","stock","ncm","cfop","unit","active","cost","min_stock","category","origin","icms_cst","icms_rate","pis_cst","pis_rate","cofins_cst","cofins_rate","cest","ibscbs_cst","tax_classification","ibs_state_rate","ibs_city_rate","cbs_rate"):
             setattr(row,key,data[key])
         s.add(row)
         s.flush()
