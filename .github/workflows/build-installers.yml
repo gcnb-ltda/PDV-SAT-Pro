@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libegl1 libgl1
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install -r requirements.txt
@@ -62,7 +63,7 @@ jobs:
             arch: Intel
           - runner: macos-15
             arch: Apple-Silicon
-    runs-on: \${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -74,11 +75,11 @@ jobs:
         run: |
           mkdir dmg-root
           cp -R "dist/PDV SAT Pro.app" dmg-root/
-          hdiutil create -volname "PDV SAT Pro" -srcfolder dmg-root -ov -format UDZO "dist/PDV-SAT-Pro-macOS-\${{ matrix.arch }}.dmg"
+          hdiutil create -volname "PDV SAT Pro" -srcfolder dmg-root -ov -format UDZO "dist/PDV-SAT-Pro-macOS-${{ matrix.arch }}.dmg"
       - uses: actions/upload-artifact@v4
         with:
-          name: PDV-SAT-Pro-macOS-\${{ matrix.arch }}
-          path: dist/PDV-SAT-Pro-macOS-\${{ matrix.arch }}.dmg
+          name: PDV-SAT-Pro-macOS-${{ matrix.arch }}
+          path: dist/PDV-SAT-Pro-macOS-${{ matrix.arch }}.dmg
 
   linux:
     needs: test
