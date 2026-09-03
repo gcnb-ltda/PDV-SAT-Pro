@@ -54,27 +54,31 @@ jobs:
 
   macos:
     needs: test
-    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-13
+            arch: Intel
+          - runner: macos-15
+            arch: Apple-Silicon
+    runs-on: \${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: python -m pip install -r requirements.txt
-      - name: Preparar dependências Universal2
-        run: |
-          python -m pip uninstall -y SQLAlchemy greenlet
-          DISABLE_SQLALCHEMY_CEXT=1 python -m pip install --no-binary SQLAlchemy --no-deps SQLAlchemy
-      - name: Compilar aplicativo Universal
-        run: python -m PyInstaller --noconfirm --clean --windowed --name "PDV SAT Pro" --target-architecture universal2 main.py
+      - name: Compilar aplicativo
+        run: python -m PyInstaller --noconfirm --clean --windowed --name "PDV SAT Pro" main.py
       - name: Criar DMG
         run: |
           mkdir dmg-root
           cp -R "dist/PDV SAT Pro.app" dmg-root/
-          hdiutil create -volname "PDV SAT Pro" -srcfolder dmg-root -ov -format UDZO "dist/PDV-SAT-Pro-macOS-Universal.dmg"
+          hdiutil create -volname "PDV SAT Pro" -srcfolder dmg-root -ov -format UDZO "dist/PDV-SAT-Pro-macOS-\${{ matrix.arch }}.dmg"
       - uses: actions/upload-artifact@v4
         with:
-          name: PDV-SAT-Pro-macOS-Universal
-          path: dist/PDV-SAT-Pro-macOS-Universal.dmg
+          name: PDV-SAT-Pro-macOS-\${{ matrix.arch }}
+          path: dist/PDV-SAT-Pro-macOS-\${{ matrix.arch }}.dmg
 
   linux:
     needs: test
