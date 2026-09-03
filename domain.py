@@ -41,6 +41,15 @@ class Product:
     stock: Decimal
     ncm: str = ""
     cfop: str = "5102"
+    unit: str = "UN"
+    origin: str = ""
+    icms_cst: str = ""
+    icms_rate: Decimal = Decimal("0")
+    pis_cst: str = ""
+    pis_rate: Decimal = Decimal("0")
+    cofins_cst: str = ""
+    cofins_rate: Decimal = Decimal("0")
+    cest: str = ""
 
 @dataclass
 class CartItem:
