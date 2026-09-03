@@ -3,7 +3,7 @@ from decimal import Decimal
 from qt_compat import (Qt,QKeySequence,QShortcut,QMainWindow,QWidget,QVBoxLayout,QHBoxLayout,QLabel,
     QLineEdit,QPushButton,QTableWidget,QTableWidgetItem,QHeaderView,QMessageBox,QComboBox,QInputDialog,
     QFrame,dialog_exec)
-from domain import Cart, money, customer_document
+from domain import Cart, money, customer_document, discount_from_percentage
 from database import find_product, persist_sale, check_stock
 from config_dialog import FiscalConfigDialog
 from fiscal import create_fiscal
@@ -21,6 +21,7 @@ QLineEdit,QComboBox{background:#171d28;border:1px solid #2b3445;border-radius:10
 QLineEdit:focus{border:1px solid #f3c623}
 QPushButton{background:#202838;border:0;border-radius:10px;padding:12px;font-weight:600}
 QPushButton:hover{background:#2a354a} QPushButton#primary{background:#f3c623;color:#121212}
+QPushButton#compact{padding:4px;min-width:32px;max-width:42px;font-size:18px}
 QTableWidget{background:#111620;border:0;gridline-color:#273043;border-radius:12px}
 QHeaderView::section{background:#171d28;color:#9ca8ba;border:0;padding:10px}
 QLabel#brand{font-size:25px;font-weight:800;color:#f3c623} QLabel#total{font-size:42px;font-weight:800;color:#f3c623}
@@ -74,7 +75,8 @@ class MainWindow(QMainWindow):
             row=self.table.rowCount(); self.table.insertRow(row)
             values=[item.product.name,str(item.quantity),f"R$ {item.product.price:.2f}",f"R$ {item.total:.2f}"]
             for col,value in enumerate(values): self.table.setItem(row,col,QTableWidgetItem(value))
-            remove=QPushButton("Remover"); remove.clicked.connect(lambda _,i=index:self.remove(i)); self.table.setCellWidget(row,4,remove)
+            remove=QPushButton("×"); remove.setObjectName("compact"); remove.setToolTip("Remover item"); remove.setFixedWidth(40); remove.clicked.connect(lambda _,i=index:self.remove(i)); self.table.setCellWidget(row,4,remove)
+        self.table.setColumnWidth(4,46)
         qty=sum((i.quantity for i in self.cart.items),Decimal("0")); self.count.setText(f"{qty} item(ns)")
         self.total.setText("R$ "+f"{self.cart.total:,.2f}".replace(",","X").replace(".",",").replace("X","."))
         self.refresh_change()
@@ -89,7 +91,14 @@ class MainWindow(QMainWindow):
                 except Exception as exc: QMessageBox.warning(self,"Quantidade",str(exc))
     def apply_discount(self):
         config=load_settings(); maximum=Decimal(str(config.get("max_discount_percent","20")))
-        value,ok=QInputDialog.getDouble(self,"Desconto",f"Valor do desconto (limite {maximum}%):",float(self.cart.discount),0,float(self.cart.subtotal),2)
+        mode,ok=QInputDialog.getItem(self,"Tipo de desconto","Aplicar desconto por:",["Valor (R$)","Porcentagem (%)"],0,False)
+        if not ok: return
+        if mode=="Porcentagem (%)":
+            current=float(self.cart.discount/self.cart.subtotal*100) if self.cart.subtotal else 0
+            percent,ok=QInputDialog.getDouble(self,"Desconto percentual",f"Porcentagem (máximo {maximum}%):",current,0,float(maximum),2)
+            value=discount_from_percentage(self.cart.subtotal,percent)
+        else:
+            value,ok=QInputDialog.getDouble(self,"Desconto em valor",f"Valor em R$ (limite {maximum}%):",float(self.cart.discount),0,float(self.cart.subtotal),2)
         if ok:
             try: self.cart.set_discount(value,maximum); self.refresh()
             except Exception as exc: QMessageBox.warning(self,"Desconto",str(exc))
