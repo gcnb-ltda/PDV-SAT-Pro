@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         self.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch); self.table.setSelectionBehavior(QTableWidget.SelectRows); self.table.doubleClicked.connect(self.edit_quantity); left.addWidget(self.table)
         footer=QHBoxLayout(); hint=QLabel("F2 Buscar   •   F4 Finalizar   •   F8 Cancelar venda"); hint.setStyleSheet("color:#7f8ba0")
         products=QPushButton("Produtos"); history=QPushButton("Histórico"); reports=QPushButton("Relatórios"); dashboard=QPushButton("Painel"); backup=QPushButton("Backup"); fiscal_settings=QPushButton("Configuração fiscal"); printer_settings=QPushButton("Impressora")
-        products.clicked.connect(lambda:dialog_exec(ProductsDialog(self))); history.clicked.connect(lambda:dialog_exec(SalesHistoryDialog(self))); reports.clicked.connect(lambda:dialog_exec(ReportsDialog(self))); dashboard.clicked.connect(lambda:dialog_exec(DashboardDialog(self))); backup.clicked.connect(lambda:dialog_exec(BackupDialog(self))); fiscal_settings.clicked.connect(self.open_settings); printer_settings.clicked.connect(lambda:dialog_exec(PrinterConfigDialog(self)))
+        products.clicked.connect(lambda checked=False:dialog_exec(ProductsDialog(self))); history.clicked.connect(lambda checked=False:dialog_exec(SalesHistoryDialog(self))); reports.clicked.connect(lambda checked=False:dialog_exec(ReportsDialog(self))); dashboard.clicked.connect(lambda checked=False:dialog_exec(DashboardDialog(self))); backup.clicked.connect(lambda checked=False:dialog_exec(BackupDialog(self))); fiscal_settings.clicked.connect(self.open_settings); printer_settings.clicked.connect(lambda checked=False:dialog_exec(PrinterConfigDialog(self)))
         footer.addWidget(hint); footer.addStretch(); footer.addWidget(products); footer.addWidget(history); footer.addWidget(reports); footer.addWidget(dashboard); footer.addWidget(backup); footer.addWidget(fiscal_settings); footer.addWidget(printer_settings); left.addLayout(footer); layout.addLayout(left,3)
         side=QFrame(); side.setObjectName("side"); sv=QVBoxLayout(side); sv.setContentsMargins(24,24,24,24)
         sv.addWidget(QLabel("RESUMO DA VENDA")); self.count=QLabel("0 itens"); sv.addWidget(self.count); sv.addStretch()
@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
             row=self.table.rowCount(); self.table.insertRow(row)
             values=[item.product.name,str(item.quantity),f"R$ {item.product.price:.2f}",f"R$ {item.total:.2f}"]
             for col,value in enumerate(values): self.table.setItem(row,col,QTableWidgetItem(value))
-            remove=QPushButton("×"); remove.setObjectName("compact"); remove.setToolTip("Remover item"); remove.setFixedWidth(40); remove.clicked.connect(lambda _,i=index:self.remove(i)); self.table.setCellWidget(row,4,remove)
+            remove=QPushButton("×"); remove.setObjectName("compact"); remove.setToolTip("Remover item"); remove.setFixedWidth(40); remove.clicked.connect(lambda checked=False,i=index:self.remove(i)); self.table.setCellWidget(row,4,remove)
         self.table.setColumnWidth(4,46)
         qty=sum((i.quantity for i in self.cart.items),Decimal("0")); self.count.setText(f"{qty} item(ns)")
         self.total.setText("R$ "+f"{self.cart.total:,.2f}".replace(",","X").replace(".",",").replace("X","."))
