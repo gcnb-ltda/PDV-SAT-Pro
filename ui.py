@@ -107,7 +107,7 @@ class MainWindow(QMainWindow):
             result=self.sat.authorize(self.cart,self.payment.currentText(),document)
             if not result.success: raise RuntimeError("Emissor fiscal recusou a venda: "+result.raw)
             config=load_settings()
-            sale_id=persist_sale(self.cart,self.payment.currentText(),result.key,document,config.get("fiscal_type", ""))
+            sale_id=persist_sale(self.cart,self.payment.currentText(),result.key,document,config.get("fiscal_type", ""),config.get("operator_name","ADMIN"))
             logger.info("Venda %s concluída; emissor=%s",sale_id,type(self.sat).__name__)
             QMessageBox.information(self,"Venda concluída",f"Venda #{sale_id} autorizada.\nChave: {result.key}")
             self.cart=Cart(); self.received.clear(); self.customer.clear(); self.refresh(); self.search.setFocus()
