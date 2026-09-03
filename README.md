@@ -53,7 +53,9 @@ O XML enviado no exemplo é deliberadamente simplificado. Antes de produção, g
 
 ## NFC-e real
 
-O cadastro e o simulador estão prontos. A autorização real deve ser ligada em `nfce.NfceSefaz` a uma biblioteca ou API fiscal homologada, pois exige XML 4.00, certificado digital, QR Code 2/3, CSC e URLs específicas de cada UF/ambiente. Não use o simulador para emitir documento fiscal válido.
+O PDV possui integração nacional com a API Focus NFe. Em homologação, sem token, permanece no simulador. Com uma empresa configurada na Focus NFe, token salvo no cofre do sistema e ambiente de produção selecionado, o conector envia a NFC-e de forma síncrona e somente conclui a venda após a autorização. Cada estabelecimento ainda precisa estar credenciado na SEFAZ de sua UF, com certificado, CSC e regras tributárias validadas. Não use chaves iniciadas por `SIM-` como documento fiscal.
+
+Antes de produção, revise em cada produto: NCM, CEST quando aplicável, CFOP, origem, CST/CSOSN de ICMS, alíquota de ICMS, CST e alíquotas de PIS/COFINS. Esses valores não são inferidos pelo software, pois dependem do produto, regime e legislação da UF.
 
 ## Atalhos
 
