@@ -1,5 +1,5 @@
 from decimal import Decimal
-from domain import Cart, Product, customer_document
+from domain import Cart, Product, customer_document, discount_from_percentage
 
 def test_cart_totals_and_discount():
     cart=Cart(); cart.add(Product(1,"1","Produto",Decimal("10.50"),Decimal("5")),2)
@@ -37,3 +37,6 @@ def test_invalid_customer_document():
         try: customer_document(value)
         except ValueError: pass
         else: raise AssertionError("CPF/CNPJ inválido deveria ser rejeitado")
+
+def test_percentage_discount_is_converted_to_money():
+    assert discount_from_percentage("250.00","10") == Decimal("25.00")
