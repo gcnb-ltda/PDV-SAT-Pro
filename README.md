@@ -38,6 +38,10 @@ Use **Configuração fiscal** na tela principal. O usuário pode selecionar SAT 
 
 Para SAT: DLL do fabricante, código de ativação e número de sessão. Para NFC-e: certificado A1, senha, CSC, ID do CSC, CNPJ, IE, UF, ambiente, série e numeração.
 
+## Configuração da impressora
+
+Use o botão **Impressora**, separado da configuração fiscal, para selecionar uma impressora instalada no sistema, definir papel térmico de 58 ou 80 mm, número de vias, cabeçalho, rodapé e impressão automática. O botão **Testar impressão** permite validar o dispositivo. O SAT autoriza o CF-e; a impressora apenas produz o extrato após a venda ser autorizada e gravada.
+
 ## SAT real
 
 1. Instale o driver/DLL do fabricante e confirme se Python e DLL têm a mesma arquitetura (normalmente 32 bits).
