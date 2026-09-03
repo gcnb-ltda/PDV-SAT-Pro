@@ -57,6 +57,9 @@ Este documento define os requisitos funcionais e não funcionais do software. A 
 | RF49 | O sistema deve permitir configurar o agendamento de relatórios recorrentes. |
 | RF50 | O sistema deve apresentar painel gerencial com indicadores e gráficos de faturamento, ticket médio, vendas, estoque e situação fiscal. |
 | RF51 | O sistema deve permitir informar opcionalmente o CPF ou CNPJ do cliente, validar o documento, incluí-lo no SAT ou NFC-e e armazená-lo no histórico da venda. |
+| RF52 | O sistema deve manter a configuração fiscal SAT/NFC-e separada da configuração da impressora de cupom. |
+| RF53 | O sistema deve permitir selecionar a impressora, configurar papel de 58 ou 80 mm, número de vias e impressão automática. |
+| RF54 | O sistema deve permitir testar a impressora e imprimir o extrato da venda somente após sua autorização e gravação. |
 
 ## Requisitos não funcionais
 
