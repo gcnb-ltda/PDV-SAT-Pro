@@ -75,6 +75,11 @@ class SaleItemRow(Base):
     unit_price: Mapped[Decimal] = mapped_column(Numeric(12,2))
     total: Mapped[Decimal] = mapped_column(Numeric(12,2))
 
+class NfceSequenceRow(Base):
+    __tablename__ = "nfce_sequences"
+    series: Mapped[int] = mapped_column(primary_key=True)
+    last_number: Mapped[int] = mapped_column(Integer, default=0)
+
 DATA_DIR = Path(user_data_dir("PDV-SAT-Pro", "GCNB"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 DB_FILE = DATA_DIR / "pdv.db"
@@ -172,3 +177,12 @@ def check_stock(cart):
                 raise ValueError(f"Estoque indisponível: {item.product.name}")
 
 def database_file(): return DB_FILE
+
+def reserve_nfce_number(series:int, configured_last:int=0):
+    """Reserva um número dentro de transação SQLite; números não são reutilizados."""
+    with Session.begin() as s:
+        row=s.get(NfceSequenceRow,int(series))
+        if row is None:
+            row=NfceSequenceRow(series=int(series),last_number=int(configured_last)); s.add(row); s.flush()
+        row.last_number=max(row.last_number,int(configured_last))+1
+        return row.last_number
