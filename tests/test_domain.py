@@ -1,5 +1,5 @@
 from decimal import Decimal
-from domain import Cart, Product
+from domain import Cart, Product, customer_document
 
 def test_cart_totals_and_discount():
     cart=Cart(); cart.add(Product(1,"1","Produto",Decimal("10.50"),Decimal("5")),2)
@@ -26,3 +26,14 @@ def test_discount_limit():
     try: cart.set_discount("20.01",20)
     except ValueError: pass
     else: raise AssertionError("Desconto acima do limite deveria falhar")
+
+def test_optional_customer_document():
+    assert customer_document("") == ""
+    assert customer_document("529.982.247-25") == "52998224725"
+    assert customer_document("04.252.011/0001-10") == "04252011000110"
+
+def test_invalid_customer_document():
+    for value in ("123", "111.111.111-11", "00.000.000/0000-00"):
+        try: customer_document(value)
+        except ValueError: pass
+        else: raise AssertionError("CPF/CNPJ inválido deveria ser rejeitado")
