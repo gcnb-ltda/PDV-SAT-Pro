@@ -9,6 +9,8 @@ from config_dialog import FiscalConfigDialog
 from fiscal import create_fiscal
 from dialogs import ProductsDialog,SalesHistoryDialog,BackupDialog
 from report_dialog import ReportsDialog,DashboardDialog
+from printer_dialog import PrinterConfigDialog
+from printing import print_receipt
 from settings import load_settings
 from audit import logger
 
@@ -34,9 +36,9 @@ class MainWindow(QMainWindow):
         self.table=QTableWidget(0,5); self.table.setHorizontalHeaderLabels(["Produto","Qtd.","Unitário","Total",""])
         self.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch); self.table.setSelectionBehavior(QTableWidget.SelectRows); self.table.doubleClicked.connect(self.edit_quantity); left.addWidget(self.table)
         footer=QHBoxLayout(); hint=QLabel("F2 Buscar   •   F4 Finalizar   •   F8 Cancelar venda"); hint.setStyleSheet("color:#7f8ba0")
-        products=QPushButton("Produtos"); history=QPushButton("Histórico"); reports=QPushButton("Relatórios"); dashboard=QPushButton("Painel"); backup=QPushButton("Backup"); settings=QPushButton("Configuração fiscal")
-        products.clicked.connect(lambda:dialog_exec(ProductsDialog(self))); history.clicked.connect(lambda:dialog_exec(SalesHistoryDialog(self))); reports.clicked.connect(lambda:dialog_exec(ReportsDialog(self))); dashboard.clicked.connect(lambda:dialog_exec(DashboardDialog(self))); backup.clicked.connect(lambda:dialog_exec(BackupDialog(self))); settings.clicked.connect(self.open_settings)
-        footer.addWidget(hint); footer.addStretch(); footer.addWidget(products); footer.addWidget(history); footer.addWidget(reports); footer.addWidget(dashboard); footer.addWidget(backup); footer.addWidget(settings); left.addLayout(footer); layout.addLayout(left,3)
+        products=QPushButton("Produtos"); history=QPushButton("Histórico"); reports=QPushButton("Relatórios"); dashboard=QPushButton("Painel"); backup=QPushButton("Backup"); fiscal_settings=QPushButton("Configuração fiscal"); printer_settings=QPushButton("Impressora")
+        products.clicked.connect(lambda:dialog_exec(ProductsDialog(self))); history.clicked.connect(lambda:dialog_exec(SalesHistoryDialog(self))); reports.clicked.connect(lambda:dialog_exec(ReportsDialog(self))); dashboard.clicked.connect(lambda:dialog_exec(DashboardDialog(self))); backup.clicked.connect(lambda:dialog_exec(BackupDialog(self))); fiscal_settings.clicked.connect(self.open_settings); printer_settings.clicked.connect(lambda:dialog_exec(PrinterConfigDialog(self)))
+        footer.addWidget(hint); footer.addStretch(); footer.addWidget(products); footer.addWidget(history); footer.addWidget(reports); footer.addWidget(dashboard); footer.addWidget(backup); footer.addWidget(fiscal_settings); footer.addWidget(printer_settings); left.addLayout(footer); layout.addLayout(left,3)
         side=QFrame(); side.setObjectName("side"); sv=QVBoxLayout(side); sv.setContentsMargins(24,24,24,24)
         sv.addWidget(QLabel("RESUMO DA VENDA")); self.count=QLabel("0 itens"); sv.addWidget(self.count); sv.addStretch()
         sv.addWidget(QLabel("TOTAL")); self.total=QLabel("R$ 0,00"); self.total.setObjectName("total"); sv.addWidget(self.total)
@@ -109,6 +111,9 @@ class MainWindow(QMainWindow):
             config=load_settings()
             sale_id=persist_sale(self.cart,self.payment.currentText(),result.key,document,config.get("fiscal_type", ""),config.get("operator_name","ADMIN"))
             logger.info("Venda %s concluída; emissor=%s",sale_id,type(self.sat).__name__)
+            if config.get("printer_auto"):
+                try: print_receipt(self.cart,self.payment.currentText(),result.key,document,sale_id,self)
+                except Exception as print_error: logger.exception("Falha de impressão"); QMessageBox.warning(self,"Impressão",f"Venda concluída, mas o cupom não foi impresso:\n{print_error}")
             QMessageBox.information(self,"Venda concluída",f"Venda #{sale_id} autorizada.\nChave: {result.key}")
             self.cart=Cart(); self.received.clear(); self.customer.clear(); self.refresh(); self.search.setFocus()
         except Exception as exc: logger.exception("Falha operacional na finalização"); QMessageBox.critical(self,"Falha ao finalizar",str(exc))
