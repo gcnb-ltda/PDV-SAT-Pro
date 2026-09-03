@@ -1,5 +1,6 @@
 from qt_compat import (QDialog,QFormLayout,QLineEdit,QComboBox,QPushButton,QHBoxLayout,
-                       QVBoxLayout,QFileDialog,QLabel,QStackedWidget,QWidget,QMessageBox,QCheckBox)
+                       QVBoxLayout,QFileDialog,QLabel,QStackedWidget,QWidget,QMessageBox,QCheckBox,
+                       QScrollArea)
 from settings import load_settings, save_settings, validate_fiscal_settings, fiscal_fingerprint
 from fiscal_certificate import A1Certificate
 from sefaz_soap import SefazSoapClient, status_request
@@ -8,15 +9,17 @@ class FiscalConfigDialog(QDialog):
     def __init__(self,parent=None):
         super().__init__(parent); self.setWindowTitle("Configuração fiscal e ativação"); self.resize(720,850)
         self.data=load_settings(); root=QVBoxLayout(self)
-        root.addWidget(QLabel("EMISSOR FISCAL")); self.kind=QComboBox(); self.kind.addItems(["SAT","NFC-e"]); self.kind.setCurrentText(self.data["fiscal_type"]); root.addWidget(self.kind)
+        scroll=QScrollArea(); scroll.setWidgetResizable(True); body=QWidget(); content=QVBoxLayout(body)
+        scroll.setWidget(body); root.addWidget(scroll)
+        content.addWidget(QLabel("EMISSOR FISCAL")); self.kind=QComboBox(); self.kind.addItems(["SAT","NFC-e"]); self.kind.setCurrentText(self.data["fiscal_type"]); content.addWidget(self.kind)
         common=QFormLayout(); self.cnpj=self.field("cnpj"); self.ie=self.field("ie"); self.uf=self.field("uf")
         self.trade_name=self.field("trade_name"); self.street=self.field("street"); self.address_number=self.field("address_number"); self.district=self.field("district"); self.cep=self.field("cep"); self.municipality_code=self.field("municipality_code"); self.municipality_name=self.field("municipality_name")
         self.env=QComboBox(); self.env.addItems(["homologacao","producao"]); self.env.setCurrentText(self.data["environment"])
         self.max_discount=self.field("max_discount_percent")
         self.company_name=self.field("company_name"); self.operator_name=self.field("operator_name"); self.report_role=QComboBox(); self.report_role.addItems(["ADMIN","GERENTE","OPERADOR"]); self.report_role.setCurrentText(self.data.get("report_role","ADMIN"))
-        common.addRow("Razão social",self.company_name); common.addRow("Nome fantasia",self.trade_name); common.addRow("CNPJ",self.cnpj); common.addRow("Inscrição Estadual",self.ie); common.addRow("UF",self.uf); common.addRow("Município",self.municipality_name); common.addRow("Código IBGE município",self.municipality_code); common.addRow("Logradouro",self.street); common.addRow("Número",self.address_number); common.addRow("Bairro",self.district); common.addRow("CEP",self.cep); common.addRow("Ambiente",self.env); common.addRow("Operador atual",self.operator_name); common.addRow("Perfil de relatórios",self.report_role); common.addRow("Desconto máximo (%)",self.max_discount); root.addLayout(common)
-        self.stack=QStackedWidget(); self.stack.addWidget(self.sat_page()); self.stack.addWidget(self.nfce_page()); root.addWidget(self.stack)
-        warning=QLabel("Credenciais são gravadas apenas neste computador. Restrinja o acesso ao usuário do sistema operacional e mantenha backup seguro do certificado."); warning.setWordWrap(True); warning.setStyleSheet("color:#d9b84c"); root.addWidget(warning)
+        common.addRow("Razão social",self.company_name); common.addRow("Nome fantasia",self.trade_name); common.addRow("CNPJ",self.cnpj); common.addRow("Inscrição Estadual",self.ie); common.addRow("UF",self.uf); common.addRow("Município",self.municipality_name); common.addRow("Código IBGE município",self.municipality_code); common.addRow("Logradouro",self.street); common.addRow("Número",self.address_number); common.addRow("Bairro",self.district); common.addRow("CEP",self.cep); common.addRow("Ambiente",self.env); common.addRow("Operador atual",self.operator_name); common.addRow("Perfil de relatórios",self.report_role); common.addRow("Desconto máximo (%)",self.max_discount); content.addLayout(common)
+        self.stack=QStackedWidget(); self.stack.addWidget(self.sat_page()); self.stack.addWidget(self.nfce_page()); content.addWidget(self.stack)
+        warning=QLabel("Credenciais são gravadas apenas neste computador. Restrinja o acesso ao usuário do sistema operacional e mantenha backup seguro do certificado."); warning.setWordWrap(True); warning.setStyleSheet("color:#d9b84c"); content.addWidget(warning)
         buttons=QHBoxLayout(); cancel=QPushButton("Cancelar"); save=QPushButton("Salvar configuração"); save.setObjectName("primary"); cancel.clicked.connect(self.reject); save.clicked.connect(self.persist); buttons.addWidget(cancel); buttons.addWidget(save); root.addLayout(buttons)
         self.kind.currentIndexChanged.connect(self.stack.setCurrentIndex); self.stack.setCurrentIndex(self.kind.currentIndex())
     def field(self,key,password=False):
