@@ -6,6 +6,7 @@ from qt_compat import (QDialog,QVBoxLayout,QHBoxLayout,QFormLayout,QComboBox,QLi
     QTableWidget,QTableWidgetItem,QHeaderView,QLabel,QFileDialog,QMessageBox,QDateEdit,QDate,
     QTabWidget,QWidget,dialog_exec)
 from reports import REPORTS, generate_report, export_report
+from report_charts import ReportChart, chart_for
 from report_scheduler import load_schedules,add_schedule,delete_schedule
 from settings import load_settings
 from audit import logger
@@ -34,6 +35,7 @@ class ReportsDialog(QDialog):
             box=QVBoxLayout(); box.addWidget(QLabel(label)); box.addWidget(widget); filters.addLayout(box)
         filters.addWidget(generate); root.addLayout(filters)
         self.summary=QLabel("Selecione um relatório e clique em Gerar relatório."); root.addWidget(self.summary)
+        self.chart=ReportChart(); root.addWidget(self.chart)
         self.table=QTableWidget(); self.table.setSortingEnabled(True); self.table.setAlternatingRowColors(True); root.addWidget(self.table)
         self.page=0; self.page_size=100; pager=QHBoxLayout(); previous=QPushButton("Página anterior"); next_page=QPushButton("Próxima página"); self.page_label=QLabel(); previous.clicked.connect(lambda:self.change_page(-1)); next_page.clicked.connect(lambda:self.change_page(1)); pager.addWidget(previous); pager.addWidget(self.page_label); pager.addWidget(next_page); pager.addStretch(); root.addLayout(pager)
         actions=QHBoxLayout(); schedule=QPushButton("Agendar relatórios"); schedule.clicked.connect(lambda:dialog_exec(SchedulesDialog(self))); actions.addWidget(schedule); actions.addStretch()
@@ -46,6 +48,7 @@ class ReportsDialog(QDialog):
             start,end=_python_date(self.start),_python_date(self.end)
             if start>end: raise ValueError("A data inicial não pode ser posterior à data final.")
             self.current=generate_report(self.kind.currentData(),start,end,self.search.text(),self.payment.currentText())
+            self.chart.set_data(chart_for(self.kind.currentData(),self.current))
             self.page=0; self.render_page()
             logger.info("Relatório gerado: %s",self.current.title)
         except Exception as exc: QMessageBox.critical(self,"Relatórios",str(exc))
