@@ -62,6 +62,8 @@ Este documento define os requisitos funcionais e não funcionais do software. A 
 | RF54 | O sistema deve permitir testar a impressora e imprimir o extrato da venda somente após sua autorização e gravação. |
 | RF55 | O sistema deve autorizar NFC-e diretamente nos Web Services da SEFAZ estadual ou virtual, sem API fiscal intermediária, mantendo ambientes separados, certificado e CSC protegidos e tratamento de autorização ou rejeição. |
 | RF56 | Cada um dos 20 relatórios analíticos deve apresentar gráfico coerente com seus dados filtrados, utilizando linhas para tendências, barras para comparações e pizza para composição. |
+| RF57 | O lançamento da venda deve permitir desconto por valor monetário ou porcentagem, respeitando o limite máximo configurado. |
+| RF58 | Formulários extensos devem possuir rolagem e manter suas ações de salvar ou cancelar visíveis em resoluções suportadas. |
 
 ## Requisitos não funcionais
 
