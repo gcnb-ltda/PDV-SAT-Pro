@@ -4,6 +4,31 @@ from decimal import Decimal, ROUND_HALF_UP
 
 MONEY = Decimal("0.01")
 
+def only_digits(value) -> str:
+    return "".join(char for char in str(value or "") if char.isdigit())
+
+def _valid_check_digits(number: str, weights: list[int]) -> bool:
+    total = sum(int(digit) * weight for digit, weight in zip(number, weights))
+    digit = 11 - total % 11
+    return int(number[len(weights)]) == (0 if digit >= 10 else digit)
+
+def customer_document(value) -> str:
+    """Normaliza e valida CPF/CNPJ opcional informado para o documento fiscal."""
+    number = only_digits(value)
+    if not number:
+        return ""
+    if len(number) == 11:
+        valid = len(set(number)) > 1 and _valid_check_digits(number, list(range(10, 1, -1))) \
+            and _valid_check_digits(number, list(range(11, 1, -1)))
+    elif len(number) == 14:
+        valid = len(set(number)) > 1 and _valid_check_digits(number, [5,4,3,2,9,8,7,6,5,4,3,2]) \
+            and _valid_check_digits(number, [6,5,4,3,2,9,8,7,6,5,4,3,2])
+    else:
+        valid = False
+    if not valid:
+        raise ValueError("CPF ou CNPJ do cliente é inválido.")
+    return number
+
 def money(value) -> Decimal:
     return Decimal(str(value)).quantize(MONEY, rounding=ROUND_HALF_UP)
 
