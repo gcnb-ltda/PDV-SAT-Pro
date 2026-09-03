@@ -31,6 +31,7 @@ class SaleRow(Base):
     total: Mapped[Decimal] = mapped_column(Numeric(12,2))
     payment: Mapped[str] = mapped_column(String(30))
     fiscal_key: Mapped[str] = mapped_column(String(80), default="")
+    customer_document: Mapped[str] = mapped_column(String(14), default="")
 
 class SaleItemRow(Base):
     __tablename__ = "sale_items"
@@ -54,6 +55,8 @@ def init_db():
         columns={row[1] for row in conn.execute(text("PRAGMA table_info(products)"))}
         if "unit" not in columns: conn.execute(text("ALTER TABLE products ADD COLUMN unit VARCHAR(8) DEFAULT 'UN'"))
         if "active" not in columns: conn.execute(text("ALTER TABLE products ADD COLUMN active INTEGER DEFAULT 1"))
+        sale_columns={row[1] for row in conn.execute(text("PRAGMA table_info(sales)"))}
+        if "customer_document" not in sale_columns: conn.execute(text("ALTER TABLE sales ADD COLUMN customer_document VARCHAR(14) DEFAULT ''"))
     with Session.begin() as s:
         if not s.query(ProductRow).first():
             s.add_all([
@@ -72,10 +75,10 @@ def find_product(term: str):
             row = s.query(ProductRow).filter(ProductRow.active == 1, ProductRow.name.ilike(f"%{term.strip()}%" )).first()
         return to_product(row) if row else None
 
-def persist_sale(cart, payment, fiscal_key):
+def persist_sale(cart, payment, fiscal_key, customer_document=""):
     with Session.begin() as s:
         sale = SaleRow(subtotal=cart.subtotal, discount=cart.discount, total=cart.total,
-                       payment=payment, fiscal_key=fiscal_key)
+                       payment=payment, fiscal_key=fiscal_key, customer_document=customer_document)
         s.add(sale); s.flush()
         for item in cart.items:
             row = s.get(ProductRow, item.product.id)
