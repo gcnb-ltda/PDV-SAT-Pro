@@ -16,7 +16,11 @@ DEFAULTS = {
     "company_name": "GCNB LTDA", "operator_name": "ADMIN", "report_role": "ADMIN",
     "printer_name": "", "printer_paper": "80", "printer_copies": "1",
     "printer_auto": False, "printer_header": "", "printer_footer": "Obrigado pela preferência",
-    "nfce_provider": "SEFAZ Direta", "tax_regime": "3"
+    "nfce_provider": "SEFAZ Direta", "tax_regime": "3",
+    "trade_name":"", "street":"", "address_number":"", "district":"", "cep":"",
+    "municipality_code":"", "municipality_name":"", "nfce_qrcode_url":"", "nfce_consult_url":"",
+    "schema_dir":"", "sefaz_endpoints_json":"", "nfce_offline_enabled":True,
+    "nfce_direct_enabled":False, "sefaz_homologation_approved":False
 }
 
 VALID_UFS={"AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"}
@@ -50,8 +54,10 @@ def validate_fiscal_settings(values):
     if values.get("environment") == "producao" and values.get("fiscal_type") == "SAT": raise ValueError("SAT não está habilitado para produção. Utilize NFC-e.")
     required = ["cnpj", "ie", "uf"]
     if values.get("fiscal_type") == "SAT": required += ["sat_dll", "sat_code"]
-    else: required += ["nfce_certificate", "nfce_password", "nfce_csc", "nfce_csc_id", "nfce_series"]
+    else: required += ["nfce_certificate", "nfce_password", "nfce_csc", "nfce_csc_id", "nfce_series", "street", "address_number", "district", "municipality_code", "municipality_name", "nfce_qrcode_url", "nfce_consult_url", "schema_dir"]
     missing = [key for key in required if not str(values.get(key, "")).strip()]
     if values.get("environment") == "producao" and missing:
         raise ValueError("Produção exige: " + ", ".join(missing))
+    if values.get("nfce_direct_enabled") and not values.get("sefaz_homologation_approved"):
+        raise ValueError("A emissão direta só pode ser ativada após aprovação dos testes de homologação SEFAZ.")
     return True
