@@ -53,7 +53,9 @@ O XML enviado no exemplo é deliberadamente simplificado. Antes de produção, g
 
 ## NFC-e real
 
-O PDV possui integração nacional com a API Focus NFe. Em homologação, sem token, permanece no simulador. Com uma empresa configurada na Focus NFe, token salvo no cofre do sistema e ambiente de produção selecionado, o conector envia a NFC-e de forma síncrona e somente conclui a venda após a autorização. Cada estabelecimento ainda precisa estar credenciado na SEFAZ de sua UF, com certificado, CSC e regras tributárias validadas. Não use chaves iniciadas por `SIM-` como documento fiscal.
+O PDV foi configurado para não depender de API fiscal intermediária. Certificado A1, senha e CSC pertencem ao estabelecimento e permanecem no computador. A comunicação de produção deverá ocorrer diretamente com o autorizador estadual ou virtual indicado para a UF no Portal Nacional da NF-e. Cada estabelecimento precisa estar credenciado na SEFAZ de sua UF. Não use chaves iniciadas por `SIM-` como documento fiscal.
+
+Por segurança, a emissão direta permanece bloqueada até a homologação do motor XML 4.00, assinatura XMLDSig, mTLS/SOAP, QR Code, schemas e respostas do autorizador. A presença dos campos de configuração não constitui homologação fiscal.
 
 Antes de produção, revise em cada produto: NCM, CEST quando aplicável, CFOP, origem, CST/CSOSN de ICMS, alíquota de ICMS, CST e alíquotas de PIS/COFINS. Esses valores não são inferidos pelo software, pois dependem do produto, regime e legislação da UF.
 
