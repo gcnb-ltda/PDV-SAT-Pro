@@ -9,6 +9,8 @@ from nfce_events import event_xml, inutilization_xml
 from nfce_xml import NS, N, E, add_supplement, build_nfce, serialize
 from sefaz_soap import SefazSoapClient, status_request
 from xsd_validator import validate_xml
+from database import reserve_nfce_number
+from copy import deepcopy
 
 class NfceSimulator:
     def __init__(self,config): self.config=config
@@ -31,7 +33,7 @@ class NfceSefaz:
             return f"NFC-e SEFAZ {self.config['uf']} — {response.status} {response.reason}"
         except Exception as exc: return f"NFC-e SEFAZ {self.config['uf']} — INDISPONÍVEL: {exc}"
     def authorize(self,cart,payment,customer_document=""):
-        self._require_release(); root,key,number=build_nfce(self.config,cart,payment,customer_document)
+        self._require_release(); number=reserve_nfce_number(int(self.config["nfce_series"]),int(self.config.get("nfce_last_number",0))); root,key,number=build_nfce(self.config,cart,payment,customer_document,number=number)
         add_supplement(root,key,self.config); self.certificate.sign_inf_nfe(root); nfe_raw=serialize(root)
         validate_xml(nfe_raw,"nfe_v4.00.xsd",self.config.get("schema_dir"))
         batch=etree.Element(N("enviNFe"),nsmap={None:NS},versao="4.00"); E(batch,"idLote",datetime.now().strftime("%Y%m%d%H%M%S")); E(batch,"indSinc","1"); batch.append(root)
@@ -46,7 +48,11 @@ class NfceSefaz:
             return FiscalResult(True,key,f"OFFLINE|Pendente de transmissão|{path}")
         save_document("responses",key,response.xml,{"cStat":response.status,"reason":response.reason,"protocol":response.protocol})
         if not response.authorized: return FiscalResult(False,key,f"{response.status}|{response.reason}")
-        path=save_document("authorized",key,nfe_raw,{"protocol":response.protocol,"number":number,"response_saved":True})
+        response_root=etree.fromstring(response.xml); protocols=response_root.xpath(".//*[local-name()='protNFe']")
+        if not protocols: raise RuntimeError("SEFAZ informou autorização sem protNFe; resposta preservada para auditoria.")
+        proc=etree.Element(N("nfeProc"),nsmap={None:NS},versao="4.00"); proc.append(root); proc.append(deepcopy(protocols[0]))
+        proc_raw=serialize(proc); validate_xml(proc_raw,"procNFe_v4.00.xsd",self.config.get("schema_dir"))
+        path=save_document("authorized",key,proc_raw,{"protocol":response.protocol,"number":number,"response_saved":True})
         return FiscalResult(True,key,f"{response.status}|{response.reason}|{response.protocol}|{path}")
     def cancel(self,key,protocol,reason):
         self._require_release()
