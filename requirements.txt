@@ -7,3 +7,5 @@ pyinstaller>=6.10,<7
 platformdirs>=4.3,<5
 keyring>=25,<26
 SecretStorage>=3.3,<4; sys_platform == "linux"
+openpyxl>=3.1,<4
+reportlab>=4.2,<5
