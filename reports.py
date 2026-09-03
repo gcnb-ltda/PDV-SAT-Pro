@@ -169,7 +169,7 @@ def _audit_report(start, end, term):
 
 def export_report(report: ReportData, filename: str):
     path=Path(filename); suffix=path.suffix.lower()
-    metadata=[report.title,report.filters,report.summary,f"Gerado em: {datetime.now():%d/%m/%Y %H:%M}"]
+    settings=load_settings(); metadata=[settings.get("company_name") or "Empresa não identificada",f"CNPJ: {settings.get('cnpj') or 'não informado'}",report.title,report.filters,report.summary,f"Gerado em: {datetime.now():%d/%m/%Y %H:%M} por {settings.get('operator_name','ADMIN')}"]
     if suffix == ".csv":
         with path.open("w",newline="",encoding="utf-8-sig") as fh:
             writer=csv.writer(fh,delimiter=";"); writer.writerows([[line] for line in metadata]); writer.writerow([]); writer.writerow(report.columns); writer.writerows(report.rows)
@@ -178,7 +178,7 @@ def export_report(report: ReportData, filename: str):
         for line in metadata: ws.append([line])
         ws.append([]); ws.append(report.columns)
         for row in report.rows: ws.append([str(value) if value is not None else "" for value in row])
-        ws.freeze_panes="A6"; ws.auto_filter.ref=ws.dimensions
+        ws.freeze_panes="A8"; ws.auto_filter.ref=ws.dimensions
         for column in ws.columns: ws.column_dimensions[column[0].column_letter].width=min(45,max(12,max(len(str(cell.value or "")) for cell in column)+2))
         wb.save(path)
     elif suffix == ".pdf":
