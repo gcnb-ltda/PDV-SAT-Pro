@@ -42,10 +42,10 @@ class ProductsDialog(QDialog):
 class SalesHistoryDialog(QDialog):
     def __init__(self,parent=None):
         super().__init__(parent); self.setWindowTitle("Histórico de vendas"); self.resize(900,520); root=QVBoxLayout(self)
-        self.table=QTableWidget(0,7); self.table.setHorizontalHeaderLabels(["Venda","Data","Subtotal","Desconto","Total","Pagamento","Documento fiscal"]); self.table.horizontalHeader().setSectionResizeMode(6,QHeaderView.Stretch); root.addWidget(self.table)
+        self.table=QTableWidget(0,8); self.table.setHorizontalHeaderLabels(["Venda","Data","Subtotal","Desconto","Total","Pagamento","Cliente CPF/CNPJ","Documento fiscal"]); self.table.horizontalHeader().setSectionResizeMode(7,QHeaderView.Stretch); root.addWidget(self.table)
         for sale in list_sales():
             row=self.table.rowCount(); self.table.insertRow(row)
-            for col,value in enumerate((sale.id,sale.created_at,f"R$ {sale.subtotal:.2f}",f"R$ {sale.discount:.2f}",f"R$ {sale.total:.2f}",sale.payment,sale.fiscal_key)): self.table.setItem(row,col,QTableWidgetItem(str(value)))
+            for col,value in enumerate((sale.id,sale.created_at,f"R$ {sale.subtotal:.2f}",f"R$ {sale.discount:.2f}",f"R$ {sale.total:.2f}",sale.payment,sale.customer_document or "Consumidor não identificado",sale.fiscal_key)): self.table.setItem(row,col,QTableWidgetItem(str(value)))
 
 class BackupDialog(QDialog):
     def __init__(self,parent=None):
