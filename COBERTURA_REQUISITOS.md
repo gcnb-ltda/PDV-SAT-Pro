@@ -27,6 +27,7 @@ Os requisitos `RF21` a `RF50` foram incorporados formalmente ao produto e consti
 
 Um requisito marcado como planejado não deve ser considerado concluído apenas por estar presente na especificação. Sua conclusão exige código, testes automatizados e critérios de aceite.
 - Estoque e histórico: validação pré-fiscal, baixa transacional e consulta das vendas (`RF16`–`RF19`).
+- Cliente na nota: CPF/CNPJ opcional, normalização, validação, inclusão no XML SAT, encaminhamento ao adaptador NFC-e e armazenamento no histórico (`RF51`).
 - Plataforma e operação: builds Windows x64/x86, macOS Universal e Linux AppImage; dados no diretório do usuário; operação local; logs rotativos com redação; backup/restauração; leitor USB tipo teclado e testes no CI (`RNF01`, `RNF03`, `RNF05`–`RNF10`, `RNF12`–`RNF20`).
 
 ## Critérios que exigem homologação ou ensaio externo
