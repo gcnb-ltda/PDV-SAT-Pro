@@ -3,7 +3,7 @@ from decimal import Decimal
 from qt_compat import (Qt,QKeySequence,QShortcut,QMainWindow,QWidget,QVBoxLayout,QHBoxLayout,QLabel,
     QLineEdit,QPushButton,QTableWidget,QTableWidgetItem,QHeaderView,QMessageBox,QComboBox,QInputDialog,
     QFrame,dialog_exec)
-from domain import Cart, money
+from domain import Cart, money, customer_document
 from database import find_product, persist_sale, check_stock
 from config_dialog import FiscalConfigDialog
 from fiscal import create_fiscal
@@ -39,6 +39,7 @@ class MainWindow(QMainWindow):
         side=QFrame(); side.setObjectName("side"); sv=QVBoxLayout(side); sv.setContentsMargins(24,24,24,24)
         sv.addWidget(QLabel("RESUMO DA VENDA")); self.count=QLabel("0 itens"); sv.addWidget(self.count); sv.addStretch()
         sv.addWidget(QLabel("TOTAL")); self.total=QLabel("R$ 0,00"); self.total.setObjectName("total"); sv.addWidget(self.total)
+        self.customer=QLineEdit(); self.customer.setPlaceholderText("Cliente: CPF ou CNPJ (opcional)"); self.customer.setMaxLength(18); sv.addWidget(self.customer)
         self.payment=QComboBox(); self.payment.addItems(["PIX","Cartão de débito","Cartão de crédito","Dinheiro"]); self.payment.currentTextChanged.connect(self.payment_changed); sv.addWidget(self.payment)
         self.received=QLineEdit(); self.received.setPlaceholderText("Valor recebido em dinheiro"); self.received.setVisible(False); self.received.textChanged.connect(self.refresh_change); sv.addWidget(self.received)
         self.change=QLabel(""); sv.addWidget(self.change)
@@ -101,10 +102,11 @@ class MainWindow(QMainWindow):
             if self.payment.currentText()=="Dinheiro":
                 received=money((self.received.text() or "0").replace(",","."))
                 if received < self.cart.total: raise ValueError("Valor recebido é menor que o total da venda.")
-            result=self.sat.authorize(self.cart,self.payment.currentText())
+            document=customer_document(self.customer.text())
+            result=self.sat.authorize(self.cart,self.payment.currentText(),document)
             if not result.success: raise RuntimeError("Emissor fiscal recusou a venda: "+result.raw)
-            sale_id=persist_sale(self.cart,self.payment.currentText(),result.key)
+            sale_id=persist_sale(self.cart,self.payment.currentText(),result.key,document)
             logger.info("Venda %s concluída; emissor=%s",sale_id,type(self.sat).__name__)
             QMessageBox.information(self,"Venda concluída",f"Venda #{sale_id} autorizada.\nChave: {result.key}")
-            self.cart=Cart(); self.received.clear(); self.refresh(); self.search.setFocus()
+            self.cart=Cart(); self.received.clear(); self.customer.clear(); self.refresh(); self.search.setFocus()
         except Exception as exc: logger.exception("Falha operacional na finalização"); QMessageBox.critical(self,"Falha ao finalizar",str(exc))
