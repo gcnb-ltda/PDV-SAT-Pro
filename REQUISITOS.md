@@ -56,6 +56,7 @@ Este documento define os requisitos funcionais e não funcionais do software. A 
 | RF48 | Relatórios extensos devem disponibilizar paginação, ordenação e pesquisa nos resultados. |
 | RF49 | O sistema deve permitir configurar o agendamento de relatórios recorrentes. |
 | RF50 | O sistema deve apresentar painel gerencial com indicadores e gráficos de faturamento, ticket médio, vendas, estoque e situação fiscal. |
+| RF51 | O sistema deve permitir informar opcionalmente o CPF ou CNPJ do cliente, validar o documento, incluí-lo no SAT ou NFC-e e armazená-lo no histórico da venda. |
 
 ## Requisitos não funcionais
 
