@@ -31,6 +31,7 @@ Um requisito marcado como planejado não deve ser considerado concluído apenas 
 - Estoque e histórico: validação pré-fiscal, baixa transacional e consulta das vendas (`RF16`–`RF19`).
 - Cliente na nota: CPF/CNPJ opcional, normalização, validação, inclusão no XML SAT, encaminhamento ao adaptador NFC-e e armazenamento no histórico (`RF51`).
 - Impressão: configuração independente do emissor fiscal, seleção da impressora do sistema, papel 58/80 mm, vias, cabeçalho, rodapé, teste e impressão automática após a confirmação da venda (`RF52`–`RF54`).
+- Produção nacional: integração síncrona Focus NFe, token no cofre do sistema, referência idempotente, cadastro tributário por produto, 27 UFs, separação entre homologação/produção e bloqueio de conclusão em rejeição (`RF55`). A validade efetiva depende do credenciamento e homologação de cada estabelecimento na SEFAZ e no provedor.
 - Plataforma e operação: builds Windows x64/x86, macOS Universal e Linux AppImage; dados no diretório do usuário; operação local; logs rotativos com redação; backup/restauração; leitor USB tipo teclado e testes no CI (`RNF01`, `RNF03`, `RNF05`–`RNF10`, `RNF12`–`RNF20`).
 
 ## Critérios que exigem homologação ou ensaio externo
