@@ -11,6 +11,13 @@ O instalador não contém CNPJ, certificado ou CSC do fabricante. Cada comprador
 faz o autocadastro no módulo Configuração fiscal e ativação. Segredos ficam no
 cofre de credenciais do sistema operacional do próprio cliente.
 
+Compatível com PySide6 (64 bits) e PySide2 (Windows 32 bits), inclusive no
+event loop principal e na abertura dos diálogos de configuração.
+
+Os 20 relatórios incluem visualização gráfica nativa: tendências em linha,
+rankings e comparações em barras e composições em pizza. Os gráficos utilizam
+os mesmos dados e filtros exibidos na tabela.
+
 PDV desktop moderno em Python, com produtos, pesquisa por código de barras, carrinho, desconto, múltiplas formas de pagamento, fechamento de venda, estoque e emissão fiscal configurável entre SAT e NFC-e.
 
 Inclui cadastro completo de produtos, edição de quantidade, limite de desconto, cálculo de troco, histórico, backup/restauração, auditoria, central de relatórios, painel gerencial e armazenamento de credenciais no cofre do sistema operacional. Consulte `REQUISITOS.md` e `COBERTURA_REQUISITOS.md`.
