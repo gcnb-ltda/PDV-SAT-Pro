@@ -13,7 +13,9 @@ DEFAULTS = {
     "cnpj": "", "ie": "", "sat_dll": "", "sat_code": "", "sat_number": "1",
     "nfce_certificate": "", "nfce_password": "", "nfce_csc": "", "nfce_csc_id": "1",
     "nfce_series": "1", "nfce_last_number": "0", "max_discount_percent": "20",
-    "company_name": "GCNB LTDA", "operator_name": "ADMIN", "report_role": "ADMIN"
+    "company_name": "GCNB LTDA", "operator_name": "ADMIN", "report_role": "ADMIN",
+    "printer_name": "", "printer_paper": "80", "printer_copies": "1",
+    "printer_auto": False, "printer_header": "", "printer_footer": "Obrigado pela preferência"
 }
 
 def load_settings():
