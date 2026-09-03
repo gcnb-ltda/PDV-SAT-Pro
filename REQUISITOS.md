@@ -26,6 +26,36 @@ Este documento define os requisitos funcionais e não funcionais do software. A 
 | RF18 | O sistema deve permitir cancelar uma venda em andamento antes de sua finalização. |
 | RF19 | O sistema deve armazenar o histórico de vendas, incluindo data, itens, pagamento, total e documento fiscal. |
 | RF20 | O sistema deve funcionar em modo de homologação ou simulação para testes sem validade fiscal. |
+| RF21 | O sistema deve emitir relatório de vendas por período, operador, caixa, produto e forma de pagamento. |
+| RF22 | O sistema deve apresentar relatório de fechamento de caixa com saldo inicial, suprimentos, sangrias, vendas, cancelamentos, descontos e saldo final. |
+| RF23 | O sistema deve gerar resumo diário contendo faturamento, quantidade de vendas, ticket médio e quantidade de itens vendidos. |
+| RF24 | O sistema deve listar os produtos vendidos, com quantidades, valores brutos, descontos e valores líquidos. |
+| RF25 | O sistema deve classificar os produtos mais vendidos por quantidade e por faturamento. |
+| RF26 | O sistema deve identificar produtos sem movimentação de venda dentro de um período informado. |
+| RF27 | O sistema deve apresentar a posição atual do estoque, incluindo unidade, quantidade, custo estimado e valor potencial de venda. |
+| RF28 | O sistema deve listar produtos abaixo ou próximos do estoque mínimo configurado. |
+| RF29 | O sistema deve apresentar as movimentações de estoque, incluindo entradas, saídas, ajustes, cancelamentos, data e responsável. |
+| RF30 | O sistema deve calcular faturamento, custo, lucro bruto e margem por produto, categoria ou período. |
+| RF31 | O sistema deve relacionar os descontos concedidos por venda, item, operador, motivo e período. |
+| RF32 | O sistema deve listar vendas e itens cancelados, incluindo motivo, operador, data e documento fiscal relacionado. |
+| RF33 | O sistema deve consolidar os valores recebidos por forma de pagamento, incluindo dinheiro, PIX, cartão, voucher e outras modalidades cadastradas. |
+| RF34 | O sistema deve comparar vendas, descontos, cancelamentos e ticket médio por operador. |
+| RF35 | O sistema deve listar documentos SAT e NFC-e autorizados, rejeitados, cancelados ou pendentes. |
+| RF36 | O sistema deve identificar documentos fiscais com erro de emissão, transmissão, autorização ou retorno. |
+| RF37 | O sistema deve consolidar os tributos informados nos documentos fiscais por período, produto e categoria tributária. |
+| RF38 | O sistema deve apresentar vendas por cliente, frequência de compras, ticket médio e data da última compra. |
+| RF39 | O sistema deve gerar a Curva ABC dos produtos por participação no faturamento, quantidade ou margem. |
+| RF40 | O sistema deve emitir relatório de auditoria das alterações de configurações, cadastros, estoque, descontos, cancelamentos e ações administrativas. |
+| RF41 | Os relatórios devem oferecer filtros aplicáveis por período, caixa, operador, produto, categoria, forma de pagamento e situação fiscal. |
+| RF42 | O sistema deve permitir exportar relatórios nos formatos PDF, CSV e XLSX. |
+| RF43 | O sistema deve permitir imprimir relatórios em formato A4 e, quando aplicável, em impressora térmica. |
+| RF44 | Os relatórios devem apresentar totais, subtotais e indicadores consolidados compatíveis com os filtros selecionados. |
+| RF45 | A visualização, impressão e exportação de relatórios sensíveis devem respeitar as permissões do usuário autenticado. |
+| RF46 | Cada relatório exportado deve identificar a empresa, a data e hora de geração, o usuário responsável e os filtros utilizados. |
+| RF47 | Os relatórios devem consultar os dados confirmados mais recentes disponíveis no banco de dados. |
+| RF48 | Relatórios extensos devem disponibilizar paginação, ordenação e pesquisa nos resultados. |
+| RF49 | O sistema deve permitir configurar o agendamento de relatórios recorrentes. |
+| RF50 | O sistema deve apresentar painel gerencial com indicadores e gráficos de faturamento, ticket médio, vendas, estoque e situação fiscal. |
 
 ## Requisitos não funcionais
 
@@ -58,3 +88,4 @@ Este documento define os requisitos funcionais e não funcionais do software. A 
 - `RNF`: requisito não funcional.
 - Alterações nesta especificação devem ser versionadas no mesmo repositório do software.
 - Requisitos fiscais devem ser homologados antes do uso em produção.
+- Os requisitos RF21 a RF50 definem o módulo de relatórios e devem ser validados com dados de teste antes da liberação operacional.
