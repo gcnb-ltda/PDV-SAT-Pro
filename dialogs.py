@@ -12,13 +12,15 @@ class ProductEditDialog(QDialog):
         self.barcode=field(getattr(row,"barcode","")); self.name=field(getattr(row,"name",""))
         self.price=QDoubleSpinBox(); self.price.setMaximum(9_999_999); self.price.setDecimals(2); self.price.setValue(float(getattr(row,"price",0)))
         self.stock=QDoubleSpinBox(); self.stock.setMaximum(9_999_999); self.stock.setDecimals(3); self.stock.setValue(float(getattr(row,"stock",0)))
-        self.unit=field(getattr(row,"unit","UN")); self.ncm=field(getattr(row,"ncm","")); self.cfop=field(getattr(row,"cfop","5102")); self.active=QCheckBox(); self.active.setChecked(bool(getattr(row,"active",1)))
-        for label,widget in (("Código de barras",self.barcode),("Descrição",self.name),("Preço",self.price),("Estoque",self.stock),("Unidade",self.unit),("NCM",self.ncm),("CFOP",self.cfop),("Ativo",self.active)): form.addRow(label,widget)
+        self.cost=QDoubleSpinBox(); self.cost.setMaximum(9_999_999); self.cost.setDecimals(2); self.cost.setValue(float(getattr(row,"cost",0)))
+        self.min_stock=QDoubleSpinBox(); self.min_stock.setMaximum(9_999_999); self.min_stock.setDecimals(3); self.min_stock.setValue(float(getattr(row,"min_stock",0)))
+        self.unit=field(getattr(row,"unit","UN")); self.category=field(getattr(row,"category","Geral")); self.ncm=field(getattr(row,"ncm","")); self.cfop=field(getattr(row,"cfop","5102")); self.active=QCheckBox(); self.active.setChecked(bool(getattr(row,"active",1)))
+        for label,widget in (("Código de barras",self.barcode),("Descrição",self.name),("Preço de venda",self.price),("Custo",self.cost),("Estoque",self.stock),("Estoque mínimo",self.min_stock),("Unidade",self.unit),("Categoria",self.category),("NCM",self.ncm),("CFOP",self.cfop),("Ativo",self.active)): form.addRow(label,widget)
         save=QPushButton("Salvar"); save.setObjectName("primary"); save.clicked.connect(self.persist); form.addRow(save)
     def persist(self):
         if not self.barcode.text().strip() or not self.name.text().strip(): QMessageBox.warning(self,"Produto","Código e descrição são obrigatórios."); return
         if len(self.ncm.text().strip()) not in (0,8): QMessageBox.warning(self,"Produto","NCM deve possuir 8 dígitos."); return
-        data={"barcode":self.barcode.text().strip(),"name":self.name.text().strip(),"price":Decimal(str(self.price.value())),"stock":Decimal(str(self.stock.value())),"unit":self.unit.text().strip().upper() or "UN","ncm":self.ncm.text().strip(),"cfop":self.cfop.text().strip() or "5102","active":1 if self.active.isChecked() else 0}
+        data={"barcode":self.barcode.text().strip(),"name":self.name.text().strip(),"price":Decimal(str(self.price.value())),"cost":Decimal(str(self.cost.value())),"stock":Decimal(str(self.stock.value())),"min_stock":Decimal(str(self.min_stock.value())),"unit":self.unit.text().strip().upper() or "UN","category":self.category.text().strip() or "Geral","ncm":self.ncm.text().strip(),"cfop":self.cfop.text().strip() or "5102","active":1 if self.active.isChecked() else 0}
         try: save_product(data,getattr(self.row,"id",None)); self.accept()
         except Exception as exc: QMessageBox.critical(self,"Produto",str(exc))
 
