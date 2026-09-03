@@ -25,6 +25,7 @@ jobs:
       - run: pytest -q
         env:
           PYTHONPATH: .
+          QT_QPA_PLATFORM: offscreen
 
   windows:
     needs: test
