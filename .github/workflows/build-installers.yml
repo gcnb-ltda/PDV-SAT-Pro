@@ -1,4 +1,5 @@
 name: Compilar instaladores
+# Gera os pacotes multiplataforma a partir da versão mais recente do PDV.
 
 on:
   push:
