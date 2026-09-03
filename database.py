@@ -21,6 +21,9 @@ class ProductRow(Base):
     cfop: Mapped[str] = mapped_column(String(4), default="5102")
     unit: Mapped[str] = mapped_column(String(8), default="UN")
     active: Mapped[int] = mapped_column(Integer, default=1)
+    cost: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=0)
+    min_stock: Mapped[Decimal] = mapped_column(Numeric(12, 3), default=0)
+    category: Mapped[str] = mapped_column(String(60), default="Geral")
 
 class SaleRow(Base):
     __tablename__ = "sales"
@@ -32,6 +35,22 @@ class SaleRow(Base):
     payment: Mapped[str] = mapped_column(String(30))
     fiscal_key: Mapped[str] = mapped_column(String(80), default="")
     customer_document: Mapped[str] = mapped_column(String(14), default="")
+    operator: Mapped[str] = mapped_column(String(60), default="ADMIN")
+    cash_register: Mapped[str] = mapped_column(String(30), default="CAIXA 1")
+    fiscal_type: Mapped[str] = mapped_column(String(10), default="")
+    fiscal_status: Mapped[str] = mapped_column(String(20), default="AUTORIZADO")
+    status: Mapped[str] = mapped_column(String(20), default="CONCLUIDA")
+
+class StockMovementRow(Base):
+    __tablename__ = "stock_movements"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    created_at: Mapped[object] = mapped_column(DateTime, server_default=func.now())
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
+    movement_type: Mapped[str] = mapped_column(String(20))
+    quantity: Mapped[Decimal] = mapped_column(Numeric(12,3))
+    sale_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    operator: Mapped[str] = mapped_column(String(60), default="ADMIN")
+    reason: Mapped[str] = mapped_column(String(140), default="")
 
 class SaleItemRow(Base):
     __tablename__ = "sale_items"
@@ -55,8 +74,16 @@ def init_db():
         columns={row[1] for row in conn.execute(text("PRAGMA table_info(products)"))}
         if "unit" not in columns: conn.execute(text("ALTER TABLE products ADD COLUMN unit VARCHAR(8) DEFAULT 'UN'"))
         if "active" not in columns: conn.execute(text("ALTER TABLE products ADD COLUMN active INTEGER DEFAULT 1"))
+        if "cost" not in columns: conn.execute(text("ALTER TABLE products ADD COLUMN cost NUMERIC(12,2) DEFAULT 0"))
+        if "min_stock" not in columns: conn.execute(text("ALTER TABLE products ADD COLUMN min_stock NUMERIC(12,3) DEFAULT 0"))
+        if "category" not in columns: conn.execute(text("ALTER TABLE products ADD COLUMN category VARCHAR(60) DEFAULT 'Geral'"))
         sale_columns={row[1] for row in conn.execute(text("PRAGMA table_info(sales)"))}
         if "customer_document" not in sale_columns: conn.execute(text("ALTER TABLE sales ADD COLUMN customer_document VARCHAR(14) DEFAULT ''"))
+        if "operator" not in sale_columns: conn.execute(text("ALTER TABLE sales ADD COLUMN operator VARCHAR(60) DEFAULT 'ADMIN'"))
+        if "cash_register" not in sale_columns: conn.execute(text("ALTER TABLE sales ADD COLUMN cash_register VARCHAR(30) DEFAULT 'CAIXA 1'"))
+        if "fiscal_type" not in sale_columns: conn.execute(text("ALTER TABLE sales ADD COLUMN fiscal_type VARCHAR(10) DEFAULT ''"))
+        if "fiscal_status" not in sale_columns: conn.execute(text("ALTER TABLE sales ADD COLUMN fiscal_status VARCHAR(20) DEFAULT 'AUTORIZADO'"))
+        if "status" not in sale_columns: conn.execute(text("ALTER TABLE sales ADD COLUMN status VARCHAR(20) DEFAULT 'CONCLUIDA'"))
     with Session.begin() as s:
         if not s.query(ProductRow).first():
             s.add_all([
@@ -75,10 +102,12 @@ def find_product(term: str):
             row = s.query(ProductRow).filter(ProductRow.active == 1, ProductRow.name.ilike(f"%{term.strip()}%" )).first()
         return to_product(row) if row else None
 
-def persist_sale(cart, payment, fiscal_key, customer_document=""):
+def persist_sale(cart, payment, fiscal_key, customer_document="", fiscal_type="", operator="ADMIN", cash_register="CAIXA 1"):
     with Session.begin() as s:
         sale = SaleRow(subtotal=cart.subtotal, discount=cart.discount, total=cart.total,
-                       payment=payment, fiscal_key=fiscal_key, customer_document=customer_document)
+                       payment=payment, fiscal_key=fiscal_key, customer_document=customer_document,
+                       fiscal_type=fiscal_type, operator=operator, cash_register=cash_register,
+                       fiscal_status="AUTORIZADO", status="CONCLUIDA")
         s.add(sale); s.flush()
         for item in cart.items:
             row = s.get(ProductRow, item.product.id)
@@ -87,6 +116,8 @@ def persist_sale(cart, payment, fiscal_key, customer_document=""):
             row.stock -= item.quantity
             s.add(SaleItemRow(sale_id=sale.id, product_id=row.id, description=row.name,
                               quantity=item.quantity, unit_price=row.price, total=item.total))
+            s.add(StockMovementRow(product_id=row.id, movement_type="SAIDA", quantity=-item.quantity,
+                                   sale_id=sale.id, operator=operator, reason="Venda concluída"))
         return sale.id
 
 def list_products(include_inactive=True):
@@ -102,9 +133,15 @@ def save_product(data, product_id=None):
         duplicate=s.query(ProductRow).filter(ProductRow.barcode == data["barcode"])
         if product_id: duplicate=duplicate.filter(ProductRow.id != product_id)
         if duplicate.first(): raise ValueError("Código de barras já cadastrado.")
-        for key in ("barcode","name","price","stock","ncm","cfop","unit","active"):
+        old_stock = Decimal(str(row.stock or 0)) if product_id else Decimal("0")
+        for key in ("barcode","name","price","stock","ncm","cfop","unit","active","cost","min_stock","category"):
             setattr(row,key,data[key])
         s.add(row)
+        s.flush()
+        delta=Decimal(str(row.stock or 0))-old_stock
+        if delta:
+            s.add(StockMovementRow(product_id=row.id, movement_type="ENTRADA" if delta > 0 else "AJUSTE",
+                                   quantity=delta, operator="ADMIN", reason="Cadastro/ajuste de produto"))
 
 def list_sales(limit=500):
     with Session() as s:
