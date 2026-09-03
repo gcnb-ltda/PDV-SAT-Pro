@@ -24,6 +24,14 @@ class ProductRow(Base):
     cost: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=0)
     min_stock: Mapped[Decimal] = mapped_column(Numeric(12, 3), default=0)
     category: Mapped[str] = mapped_column(String(60), default="Geral")
+    origin: Mapped[str] = mapped_column(String(2), default="")
+    icms_cst: Mapped[str] = mapped_column(String(4), default="")
+    icms_rate: Mapped[Decimal] = mapped_column(Numeric(7,4), default=0)
+    pis_cst: Mapped[str] = mapped_column(String(3), default="")
+    pis_rate: Mapped[Decimal] = mapped_column(Numeric(7,4), default=0)
+    cofins_cst: Mapped[str] = mapped_column(String(3), default="")
+    cofins_rate: Mapped[Decimal] = mapped_column(Numeric(7,4), default=0)
+    cest: Mapped[str] = mapped_column(String(7), default="")
 
 class SaleRow(Base):
     __tablename__ = "sales"
@@ -77,6 +85,8 @@ def init_db():
         if "cost" not in columns: conn.execute(text("ALTER TABLE products ADD COLUMN cost NUMERIC(12,2) DEFAULT 0"))
         if "min_stock" not in columns: conn.execute(text("ALTER TABLE products ADD COLUMN min_stock NUMERIC(12,3) DEFAULT 0"))
         if "category" not in columns: conn.execute(text("ALTER TABLE products ADD COLUMN category VARCHAR(60) DEFAULT 'Geral'"))
+        for name,definition in (("origin","VARCHAR(2) DEFAULT ''"),("icms_cst","VARCHAR(4) DEFAULT ''"),("icms_rate","NUMERIC(7,4) DEFAULT 0"),("pis_cst","VARCHAR(3) DEFAULT ''"),("pis_rate","NUMERIC(7,4) DEFAULT 0"),("cofins_cst","VARCHAR(3) DEFAULT ''"),("cofins_rate","NUMERIC(7,4) DEFAULT 0"),("cest","VARCHAR(7) DEFAULT ''")):
+            if name not in columns: conn.execute(text(f"ALTER TABLE products ADD COLUMN {name} {definition}"))
         sale_columns={row[1] for row in conn.execute(text("PRAGMA table_info(sales)"))}
         if "customer_document" not in sale_columns: conn.execute(text("ALTER TABLE sales ADD COLUMN customer_document VARCHAR(14) DEFAULT ''"))
         if "operator" not in sale_columns: conn.execute(text("ALTER TABLE sales ADD COLUMN operator VARCHAR(60) DEFAULT 'ADMIN'"))
@@ -93,7 +103,7 @@ def init_db():
             ])
 
 def to_product(row):
-    return Product(row.id, row.barcode, row.name, row.price, row.stock, row.ncm, row.cfop)
+    return Product(row.id,row.barcode,row.name,row.price,row.stock,row.ncm,row.cfop,row.unit,row.origin,row.icms_cst,row.icms_rate,row.pis_cst,row.pis_rate,row.cofins_cst,row.cofins_rate,row.cest)
 
 def find_product(term: str):
     with Session() as s:
@@ -134,7 +144,7 @@ def save_product(data, product_id=None):
         if product_id: duplicate=duplicate.filter(ProductRow.id != product_id)
         if duplicate.first(): raise ValueError("Código de barras já cadastrado.")
         old_stock = Decimal(str(row.stock or 0)) if product_id else Decimal("0")
-        for key in ("barcode","name","price","stock","ncm","cfop","unit","active","cost","min_stock","category"):
+        for key in ("barcode","name","price","stock","ncm","cfop","unit","active","cost","min_stock","category","origin","icms_cst","icms_rate","pis_cst","pis_rate","cofins_cst","cofins_rate","cest"):
             setattr(row,key,data[key])
         s.add(row)
         s.flush()
