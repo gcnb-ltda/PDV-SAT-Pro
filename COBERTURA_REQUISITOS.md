@@ -26,6 +26,7 @@ Os requisitos `RF21` a `RF50` foram incorporados formalmente ao produto e consti
 | RF48 | Implementado | Ordenação, pesquisa e paginação de 100 registros por página disponíveis. |
 | RF49 | Implementado | Agendamentos diários, semanais ou mensais exportam CSV/XLSX/PDF ao iniciar o PDV quando vencidos. |
 | RF50 | Implementado | Painel apresenta faturamento, vendas, ticket médio e ranking de produtos dos últimos 30 dias. |
+| RF56 | Implementado | Os 20 relatórios possuem gráficos nativos e responsivos, recalculados a cada alteração de período, busca ou forma de pagamento. |
 
 Um requisito marcado como planejado não deve ser considerado concluído apenas por estar presente na especificação. Sua conclusão exige código, testes automatizados e critérios de aceite.
 - Estoque e histórico: validação pré-fiscal, baixa transacional e consulta das vendas (`RF16`–`RF19`).
