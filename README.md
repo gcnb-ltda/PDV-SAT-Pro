@@ -1,5 +1,12 @@
 # PDV SAT Pro
 
+## Motor NFC-e SEFAZ direto
+
+O projeto inclui núcleo sem provedor intermediário para NFC-e 4.00: A1 e
+XMLDSig, SOAP mTLS, XSD, QR Code/CSC, status, autorização, cancelamento,
+inutilização, contingência e armazenamento. Permanece em simulação até a
+homologação real por UF. Consulte HOMOLOGACAO_SEFAZ.md.
+
 PDV desktop moderno em Python, com produtos, pesquisa por código de barras, carrinho, desconto, múltiplas formas de pagamento, fechamento de venda, estoque e emissão fiscal configurável entre SAT e NFC-e.
 
 Inclui cadastro completo de produtos, edição de quantidade, limite de desconto, cálculo de troco, histórico, backup/restauração, auditoria, central de relatórios, painel gerencial e armazenamento de credenciais no cofre do sistema operacional. Consulte `REQUISITOS.md` e `COBERTURA_REQUISITOS.md`.
