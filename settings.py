@@ -50,7 +50,10 @@ def save_settings(values):
     CONFIG_FILE.write_text(json.dumps(public, ensure_ascii=False, indent=2), encoding="utf-8")
 
 def validate_fiscal_settings(values):
-    if str(values.get("uf","")).upper() not in VALID_UFS: raise ValueError("Informe uma UF brasileira válida.")
+    # Em homologação/simulação a tela pode ser salva por etapas. Produção e a
+    # ativação do motor direto continuam exigindo configuração completa.
+    strict = values.get("environment") == "producao" or values.get("nfce_direct_enabled")
+    if strict and str(values.get("uf","")).upper() not in VALID_UFS: raise ValueError("Informe uma UF brasileira válida.")
     if values.get("environment") == "producao" and values.get("fiscal_type") == "SAT": raise ValueError("SAT não está habilitado para produção. Utilize NFC-e.")
     required = ["cnpj", "ie", "uf"]
     if values.get("fiscal_type") == "SAT": required += ["sat_dll", "sat_code"]
@@ -61,3 +64,4 @@ def validate_fiscal_settings(values):
     if values.get("nfce_direct_enabled") and not values.get("sefaz_homologation_approved"):
         raise ValueError("A emissão direta só pode ser ativada após aprovação dos testes de homologação SEFAZ.")
     return True
+
