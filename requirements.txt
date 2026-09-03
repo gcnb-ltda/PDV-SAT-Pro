@@ -4,3 +4,6 @@ SQLAlchemy>=2.0,<3
 python-dotenv>=1.0,<2
 pytest>=8,<9
 pyinstaller>=6.10,<7
+platformdirs>=4.3,<5
+keyring>=25,<26
+SecretStorage>=3.3,<4; sys_platform == "linux"

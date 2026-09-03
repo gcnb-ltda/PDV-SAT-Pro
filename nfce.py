@@ -25,6 +25,4 @@ class NfceSefaz:
         raise RuntimeError("Configure o provedor NFC-e homologado no adaptador NfceSefaz.")
 
 def create_nfce(config):
-    # O cadastro fica pronto; modo real só deve ser ativado após homologação do provedor.
-    return NfceSimulator(config)
-
+    return NfceSefaz(config) if config.get("environment") == "producao" else NfceSimulator(config)

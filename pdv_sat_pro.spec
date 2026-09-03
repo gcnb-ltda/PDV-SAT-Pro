@@ -1,7 +1,7 @@
-from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 datas = collect_data_files("PySide6")
-a = Analysis(["main.py"], pathex=[], binaries=[], datas=datas, hiddenimports=["sqlalchemy.dialects.sqlite"],
+a = Analysis(["main.py"], pathex=[], binaries=[], datas=datas, hiddenimports=["sqlalchemy.dialects.sqlite"] + collect_submodules("keyring.backends"),
              hookspath=[], hooksconfig={}, runtime_hooks=[], excludes=[], noarchive=False)
 pyz = PYZ(a.pure)
 exe = EXE(pyz, a.scripts, a.binaries, a.datas, [], name="PDV-SAT-Pro", debug=False,

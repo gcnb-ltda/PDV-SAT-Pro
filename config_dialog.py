@@ -1,6 +1,6 @@
 from qt_compat import (QDialog,QFormLayout,QLineEdit,QComboBox,QPushButton,QHBoxLayout,
                        QVBoxLayout,QFileDialog,QLabel,QStackedWidget,QWidget,QMessageBox)
-from settings import load_settings, save_settings
+from settings import load_settings, save_settings, validate_fiscal_settings
 
 class FiscalConfigDialog(QDialog):
     def __init__(self,parent=None):
@@ -9,7 +9,8 @@ class FiscalConfigDialog(QDialog):
         root.addWidget(QLabel("EMISSOR FISCAL")); self.kind=QComboBox(); self.kind.addItems(["SAT","NFC-e"]); self.kind.setCurrentText(self.data["fiscal_type"]); root.addWidget(self.kind)
         common=QFormLayout(); self.cnpj=self.field("cnpj"); self.ie=self.field("ie"); self.uf=self.field("uf")
         self.env=QComboBox(); self.env.addItems(["homologacao","producao"]); self.env.setCurrentText(self.data["environment"])
-        common.addRow("CNPJ",self.cnpj); common.addRow("Inscrição Estadual",self.ie); common.addRow("UF",self.uf); common.addRow("Ambiente",self.env); root.addLayout(common)
+        self.max_discount=self.field("max_discount_percent")
+        common.addRow("CNPJ",self.cnpj); common.addRow("Inscrição Estadual",self.ie); common.addRow("UF",self.uf); common.addRow("Ambiente",self.env); common.addRow("Desconto máximo (%)",self.max_discount); root.addLayout(common)
         self.stack=QStackedWidget(); self.stack.addWidget(self.sat_page()); self.stack.addWidget(self.nfce_page()); root.addWidget(self.stack)
         warning=QLabel("Credenciais são gravadas apenas neste computador. Restrinja o acesso ao usuário do sistema operacional e mantenha backup seguro do certificado."); warning.setWordWrap(True); warning.setStyleSheet("color:#d9b84c"); root.addWidget(warning)
         buttons=QHBoxLayout(); cancel=QPushButton("Cancelar"); save=QPushButton("Salvar configuração"); save.setObjectName("primary"); cancel.clicked.connect(self.reject); save.clicked.connect(self.persist); buttons.addWidget(cancel); buttons.addWidget(save); root.addLayout(buttons)
@@ -29,5 +30,9 @@ class FiscalConfigDialog(QDialog):
     def pick_cert(self): self.cert.setText(QFileDialog.getOpenFileName(self,"Certificado A1",filter="Certificado (*.pfx *.p12)")[0])
     def persist(self):
         if not self.cnpj.text().strip(): QMessageBox.warning(self,"Configuração","Informe o CNPJ."); return
-        values={"fiscal_type":self.kind.currentText(),"cnpj":self.cnpj.text(),"ie":self.ie.text(),"uf":self.uf.text().upper(),"environment":self.env.currentText(),"sat_dll":self.sat_dll.text(),"sat_code":self.sat_code.text(),"sat_number":self.sat_number.text(),"nfce_certificate":self.cert.text(),"nfce_password":self.cert_pass.text(),"nfce_csc":self.csc.text(),"nfce_csc_id":self.csc_id.text(),"nfce_series":self.series.text(),"nfce_last_number":self.last.text()}
-        save_settings(values); self.accept()
+        values={"fiscal_type":self.kind.currentText(),"cnpj":self.cnpj.text(),"ie":self.ie.text(),"uf":self.uf.text().upper(),"environment":self.env.currentText(),"max_discount_percent":self.max_discount.text(),"sat_dll":self.sat_dll.text(),"sat_code":self.sat_code.text(),"sat_number":self.sat_number.text(),"nfce_certificate":self.cert.text(),"nfce_password":self.cert_pass.text(),"nfce_csc":self.csc.text(),"nfce_csc_id":self.csc_id.text(),"nfce_series":self.series.text(),"nfce_last_number":self.last.text()}
+        try:
+            percent=float(values["max_discount_percent"])
+            if not 0 <= percent <= 100: raise ValueError("Desconto máximo deve estar entre 0 e 100%.")
+            validate_fiscal_settings(values); save_settings(values); self.accept()
+        except Exception as exc: QMessageBox.critical(self,"Configuração",str(exc))

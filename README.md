@@ -2,6 +2,8 @@
 
 PDV desktop moderno em Python, com produtos, pesquisa por código de barras, carrinho, desconto, múltiplas formas de pagamento, fechamento de venda, estoque e emissão fiscal configurável entre SAT e NFC-e.
 
+Inclui cadastro completo de produtos, edição de quantidade, limite de desconto, cálculo de troco, histórico, backup/restauração, auditoria e armazenamento de credenciais no cofre do sistema operacional. Consulte `REQUISITOS.md` e `COBERTURA_REQUISITOS.md`.
+
 ## Instalação rápida
 
 O pacote inclui instaladores para Windows, Linux e macOS. Consulte `INSTALACAO.md` ou execute:
