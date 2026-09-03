@@ -50,6 +50,11 @@ class Product:
     cofins_cst: str = ""
     cofins_rate: Decimal = Decimal("0")
     cest: str = ""
+    ibscbs_cst: str = ""
+    tax_classification: str = ""
+    ibs_state_rate: Decimal = Decimal("0")
+    ibs_city_rate: Decimal = Decimal("0")
+    cbs_rate: Decimal = Decimal("0")
 
 @dataclass
 class CartItem:
