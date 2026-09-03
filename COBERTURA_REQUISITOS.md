@@ -21,10 +21,10 @@ Os requisitos `RF21` a `RF50` foram incorporados formalmente ao produto e consti
 |---|---|---|
 | RF21–RF40 | Implementado com ressalvas | Central contém os 20 relatórios. Caixa sem suprimentos/sangrias, cancelamentos e tributos exibem apenas dados efetivamente registrados; tributos usam base por NCM até integração do retorno fiscal detalhado. |
 | RF41–RF44 | Implementado | Filtros, ordenação, totais e exportação CSV/XLSX/PDF disponíveis. PDF pode ser impresso pelo visualizador do sistema. |
-| RF45–RF46 | Planejado | Depende da implantação de autenticação, perfis e identificação da empresa. |
+| RF45–RF46 | Implementado | Perfis ADMIN/GERENTE restringem relatórios sensíveis; exportações registram empresa, CNPJ, operador, data, hora e filtros. A autenticação corporativa pode substituir o perfil local em implantação multiusuário. |
 | RF47 | Implementado | Relatórios consultam diretamente as transações confirmadas na base SQLite. |
-| RF48 | Parcial | Ordenação e pesquisa estão disponíveis; paginação dedicada permanece pendente. |
-| RF49 | Planejado | O agendamento recorrente permanece pendente. |
+| RF48 | Implementado | Ordenação, pesquisa e paginação de 100 registros por página disponíveis. |
+| RF49 | Implementado | Agendamentos diários, semanais ou mensais exportam CSV/XLSX/PDF ao iniciar o PDV quando vencidos. |
 | RF50 | Implementado | Painel apresenta faturamento, vendas, ticket médio e ranking de produtos dos últimos 30 dias. |
 
 Um requisito marcado como planejado não deve ser considerado concluído apenas por estar presente na especificação. Sua conclusão exige código, testes automatizados e critérios de aceite.
